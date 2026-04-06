@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PANDA V1000 PRO — Sinais ao vivo com vantagem matemática</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:     #C9A84C;
+  --gold2:    #E8C96A;
+  --gold3:    #F5DFA0;
+  --gold-dim: #7A6230;
+  --green:    #1E8A5E;
+  --green2:   #25A872;
+  --green-dim:#0F4D35;
+  --green-bg: #0A1F16;
+  --ink:      #0C0C0A;
+  --ink2:     #1A1A16;
+  --ink3:     #252520;
+  --fog:      #6B6B60;
+  --fog2:     #9A9A90;
+  --paper:    #F8F6F0;
+  --cream:    #FDFCF8;
+  --line:     rgba(201,168,76,0.18);
+  --line2:    rgba(201,168,76,0.08);
+  --mono: 'JetBrains Mono', monospace;
+  --serif: 'Playfair Display', Georgia, serif;
+  --sans: 'Syne', sans-serif;
+  --r: 6px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--ink);
+  color: var(--cream);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── GRAIN ── */
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:0.35;
+}
+
+/* ── NAV ── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:1.25rem 2.5rem;
+  background:rgba(12,12,10,0.82);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--line);
+}
+.nav-logo {
+  font-family:var(--mono); font-size:0.72rem; font-weight:500;
+  letter-spacing:0.14em; color:var(--gold);
+  display:flex; align-items:center; gap:10px;
+}
+.nav-logo .dot {
+  width:7px; height:7px; border-radius:50%; background:var(--green2);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100%{opacity:1;transform:scale(1);}
+  50%{opacity:0.4;transform:scale(0.7);}
+}
+.nav-right { display:flex; align-items:center; gap:2.5rem; }
+.nav-link {
+  font-size:0.78rem; font-weight:500; color:var(--fog2);
+  text-decoration:none; letter-spacing:0.04em;
+  transition:color 0.2s;
+}
+.nav-link:hover { color:var(--gold2); }
+.nav-cta {
+  font-family:var(--mono); font-size:0.7rem; font-weight:500;
+  color:var(--ink); background:var(--gold);
+  padding:0.5rem 1.25rem; border-radius:var(--r);
+  text-decoration:none; letter-spacing:0.06em;
+  transition:background 0.2s, transform 0.2s;
+}
+.nav-cta:hover { background:var(--gold2); transform:translateY(-1px); }
+
+/* ── TICKER ── */
+.ticker-outer {
+  margin-top:72px;
+  background:var(--green-dim);
+  border-bottom:1px solid rgba(30,138,94,0.3);
+  overflow:hidden; padding:0.55rem 0;
+}
+.ticker-track {
+  display:flex; gap:3.5rem;
+  animation:scroll 35s linear infinite;
+  white-space:nowrap;
+}
+@keyframes scroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+.ticker-item {
+  font-family:var(--mono); font-size:0.68rem; color:#6DF5B0;
+  display:flex; align-items:center; gap:7px; font-weight:500;
+}
+.ticker-item .chk { color:#4ade80; font-size:0.6rem; }
+
+/* ── HERO ── */
+.hero {
+  position:relative; z-index:1;
+  min-height:100vh;
+  display:flex; align-items:center;
+  padding:7rem 2.5rem 5rem;
+  max-width:1200px; margin:0 auto;
+  gap:5rem;
+}
+.hero-bg {
+  position:absolute; inset:0; z-index:-1;
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 50%, rgba(30,138,94,0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 20% 40%, rgba(201,168,76,0.06) 0%, transparent 60%);
+}
+.hero-left { flex:1; max-width:560px; }
+.hero-kicker {
+  font-family:var(--mono); font-size:0.68rem; font-weight:500;
+  letter-spacing:0.16em; color:var(--green2); text-transform:uppercase;
+  margin-bottom:1.5rem; display:flex; align-items:center; gap:8px;
+}
+.hero-kicker::before {
+  content:''; display:block; width:20px; height:1px; background:var(--green2);
+}
+.hero h1 {
+  font-family:var(--serif);
+  font-size:clamp(2.8rem, 5.5vw, 4.4rem);
+  line-height:1.08; letter-spacing:-0.01em;
+  margin-bottom:1.5rem; font-weight:700;
+}
+.hero h1 em {
+  font-style:italic; color:var(--gold2);
+  display:block;
+}
+.hero-desc {
+  font-size:1rem; font-weight:400; color:var(--fog2);
+  line-height:1.8; margin-bottom:2.5rem; max-width:440px;
+}
+.hero-actions { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; }
+.btn-gold {
+  font-family:var(--mono); font-size:0.78rem; font-weight:500;
+  letter-spacing:0.07em; background:var(--gold); color:var(--ink);
+  padding:0.9rem 2rem; border-radius:var(--r); text-decoration:none;
+  transition:all 0.2s; display:inline-block; position:relative;
+  overflow:hidden;
+}
+.btn-gold::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.15) 50%,transparent 100%);
+  transform:translateX(-100%); transition:transform 0.5s;
+}
+.btn-gold:hover { background:var(--gold2); transform:translateY(-2px); }
+.btn-gold:hover::after { transform:translateX(100%); }
+.btn-ghost-hero {
+  font-size:0.85rem; color:var(--fog2);
+  text-decoration:none;
+  border:1px solid rgba(201,168,76,0.25);
+  padding:0.9rem 1.75rem; border-radius:var(--r);
+  transition:all 0.2s;
+}
+.btn-ghost-hero:hover { border-color:var(--gold); color:var(--gold); }
+
+/* ── SIGNAL CARD HERO ── */
+.hero-right { flex:0 0 380px; position:relative; }
+.hero-right::before {
+  content:'';
+  position:absolute; inset:-30px;
+  background:radial-gradient(ellipse at center, rgba(201,168,76,0.08) 0%, transparent 70%);
+  z-index:-1;
+}
+.signal-card {
+  background:var(--ink3);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:1.75rem;
+  position:relative;
+  animation:float 6s ease-in-out infinite;
+}
+@keyframes float{
+  0%,100%{transform:translateY(0) rotate(0.4deg);}
+  50%{transform:translateY(-8px) rotate(-0.3deg);}
+}
+.signal-card::before {
+  content:''; position:absolute; top:0; left:1.75rem; right:1.75rem;
+  height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.sc-head {
+  display:flex; justify-content:space-between; align-items:flex-start;
+  margin-bottom:1.25rem; padding-bottom:1rem;
+  border-bottom:1px solid var(--line);
+}
+.sc-brand { font-family:var(--mono); font-size:0.6rem; color:var(--gold); letter-spacing:0.12em; font-weight:500; }
+.sc-live {
+  display:flex; align-items:center; gap:5px;
+  font-family:var(--mono); font-size:0.6rem; color:var(--green2); font-weight:500;
+}
+.sc-match { font-size:0.95rem; font-weight:600; margin-bottom:3px; }
+.sc-meta { font-family:var(--mono); font-size:0.68rem; color:var(--fog2); margin-bottom:1.25rem; }
+.sc-rows { display:flex; flex-direction:column; }
+.sc-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:0.55rem 0; border-bottom:1px solid var(--line2);
+  font-size:0.8rem;
+}
+.sc-row:last-child { border-bottom:none; }
+.sc-label { color:var(--fog); }
+.sc-val { font-family:var(--mono); font-size:0.76rem; font-weight:500; }
+.sc-val.gold { color:var(--gold2); }
+.sc-val.green { color:#4ade80; }
+.sc-val.white { color:var(--cream); }
+.sc-foot {
+  margin-top:1.25rem; padding-top:1rem;
+  border-top:1px solid var(--line);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.sc-score {
+  font-family:var(--serif); font-size:1.5rem; font-style:italic;
+  color:var(--gold2);
+}
+.sc-badge {
+  font-family:var(--mono); font-size:0.6rem; font-weight:500;
+  letter-spacing:0.1em; color:var(--green2);
+  background:rgba(30,138,94,0.15);
+  border:1px solid rgba(30,138,94,0.3);
+  padding:0.3rem 0.8rem; border-radius:3px;
+  text-transform:uppercase;
+}
+
+/* ── NUMBERS ── */
+.numbers {
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  display:grid; grid-template-columns:repeat(4,1fr);
+  position:relative; z-index:1;
+}
+.num-item {
+  padding:3rem 2rem; text-align:center;
+  border-right:1px solid var(--line);
+  position:relative; overflow:hidden;
+  transition:background 0.3s;
+}
+.num-item:hover { background:rgba(201,168,76,0.04); }
+.num-item:last-child { border-right:none; }
+.num-n {
+  font-family:var(--serif); font-style:italic;
+  font-size:3.2rem; color:var(--gold2); line-height:1;
+  margin-bottom:0.4rem;
+}
+.num-l { font-size:0.75rem; color:var(--fog); font-weight:400; letter-spacing:0.04em; }
+
+/* ── SECTION ── */
+.section {
+  max-width:1100px; margin:0 auto;
+  padding:6rem 2.5rem;
+  position:relative; z-index:1;
+}
+.sec-label {
+  font-family:var(--mono); font-size:0.65rem; font-weight:500;
+  letter-spacing:0.16em; color:var(--green2); text-transform:uppercase;
+  margin-bottom:1rem; display:flex; align-items:center; gap:8px;
+}
+.sec-label::before { content:''; display:block; width:16px; height:1px; background:var(--green2); }
+.sec-h {
+  font-family:var(--serif);
+  font-size:clamp(2rem,3.5vw,3rem);
+  line-height:1.12; letter-spacing:-0.01em;
+  margin-bottom:1rem; font-weight:700;
+}
+.sec-h em { font-style:italic; color:var(--gold2); }
+.sec-p { font-size:0.95rem; color:var(--fog2); line-height:1.8; max-width:480px; font-weight:400; }
+
+/* ── FEATURES GRID ── */
+.feat-grid {
+  margin-top:4rem;
+  display:grid; grid-template-columns:repeat(3,1fr);
+  border-top:1px solid var(--line);
+}
+.feat-col { border-right:1px solid var(--line); }
+.feat-col:last-child { border-right:none; }
+.feat-item {
+  padding:2.5rem 2rem;
+  border-bottom:1px solid var(--line);
+  transition:background 0.3s;
+}
+.feat-item:hover { background:rgba(201,168,76,0.03); }
+.feat-item:last-child { border-bottom:none; }
+.feat-num {
+  font-family:var(--mono); font-size:0.6rem; color:var(--gold-dim);
+  letter-spacing:0.1em; margin-bottom:1.2rem;
+  display:flex; align-items:center; gap:6px;
+}
+.feat-num::after { content:''; flex:1; height:1px; background:var(--line); }
+.feat-item h3 {
+  font-family:var(--serif); font-size:1.1rem; font-style:italic;
+  margin-bottom:0.6rem; color:var(--cream);
+}
+.feat-item p { font-size:0.8rem; color:var(--fog); line-height:1.75; }
+
+/* ── HOW STEPS ── */
+.how-wrap {
+  background:var(--ink2);
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.how-inner { max-width:1100px; margin:0 auto; padding:6rem 2.5rem; }
+.how-steps {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  margin-top:4rem; border-top:1px solid var(--line);
+}
+.how-step {
+  padding:2rem 1.75rem;
+  border-right:1px solid var(--line);
+}
+.how-step:last-child { border-right:none; }
+.step-num {
+  font-family:var(--mono); font-size:0.6rem; color:var(--gold-dim);
+  letter-spacing:0.12em; margin-bottom:1.5rem; display:block;
+}
+.step-bar { width:28px; height:2px; background:var(--gold); margin-bottom:1.25rem; border-radius:1px; }
+.how-step h3 { font-size:0.9rem; font-weight:600; margin-bottom:0.5rem; color:var(--cream); }
+.how-step p { font-size:0.78rem; color:var(--fog); line-height:1.7; }
+
+/* ── EXAMPLE SECTION ── */
+.example-wrap {
+  background:var(--ink2);
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.example-inner {
+  max-width:1100px; margin:0 auto; padding:6rem 2.5rem;
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:6rem; align-items:center;
+}
+.ex-card {
+  background:var(--ink3);
+  border:1px solid var(--line);
+  border-radius:10px; padding:1.75rem;
+  font-family:var(--mono); font-size:0.78rem; line-height:2.1;
+  position:relative; overflow:hidden;
+}
+.ex-card::before {
+  content:''; position:absolute; top:0; left:0; right:0;
+  height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.eg { color:var(--gold2); }
+.edim { color:rgba(255,255,255,0.2); }
+.ew { color:rgba(255,255,255,0.85); }
+.egr { color:#4ade80; }
+.result-pill {
+  display:inline-flex; align-items:center; gap:8px;
+  background:rgba(30,138,94,0.12);
+  border:1px solid rgba(30,138,94,0.3);
+  border-radius:4px; padding:0.5rem 1rem;
+  font-family:var(--mono); font-size:0.68rem; color:var(--green2);
+  font-weight:500; letter-spacing:0.06em; text-transform:uppercase;
+  margin-bottom:1.25rem;
+}
+.result-pill .dot { width:6px; height:6px; border-radius:50%; background:var(--green2); }
+
+/* ── PRICING ── */
+.plans-wrap {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:1.5rem; margin-top:4rem;
+}
+.plan {
+  border:1px solid var(--line);
+  border-radius:10px; padding:2.5rem;
+  background:var(--ink2);
+  position:relative; overflow:hidden;
+  transition:transform 0.2s, border-color 0.2s;
+}
+.plan:hover { transform:translateY(-3px); }
+.plan.feat {
+  border-color:var(--gold);
+  background:linear-gradient(135deg, var(--ink2) 0%, rgba(201,168,76,0.06) 100%);
+}
+.plan.feat::before {
+  content:''; position:absolute; top:0; left:0; right:0;
+  height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.plan-tag {
+  position:absolute; top:1.5rem; right:1.5rem;
+  font-family:var(--mono); font-size:0.58rem; font-weight:500;
+  letter-spacing:0.1em; text-transform:uppercase;
+  background:var(--gold); color:var(--ink);
+  padding:3px 9px; border-radius:3px;
+}
+.plan-name {
+  font-family:var(--mono); font-size:0.65rem; font-weight:500;
+  letter-spacing:0.12em; color:var(--fog); text-transform:uppercase;
+  margin-bottom:1.25rem;
+}
+.plan-price {
+  display:flex; align-items:baseline; gap:4px;
+  margin-bottom:0.35rem;
+}
+.plan-curr { font-size:1.1rem; color:var(--fog2); font-weight:400; align-self:flex-start; margin-top:8px; }
+.plan-val {
+  font-family:var(--serif); font-size:3.5rem; font-style:italic;
+  color:var(--gold2); line-height:1;
+}
+.plan-period { font-size:0.78rem; color:var(--fog); margin-bottom:2rem; font-weight:400; }
+.plan-div { height:1px; background:var(--line); margin:1.5rem 0; }
+.plan-list { list-style:none; display:flex; flex-direction:column; gap:0.7rem; margin-bottom:2rem; }
+.plan-list li {
+  font-size:0.82rem; color:var(--fog); font-weight:400;
+  display:flex; align-items:center; gap:10px;
+}
+.ok { color:var(--green2); font-size:0.65rem; font-weight:600; }
+.no { color:var(--fog2); opacity:0.4; font-size:0.65rem; }
+.plan-btn {
+  display:block; text-align:center;
+  font-family:var(--mono); font-size:0.75rem; font-weight:500;
+  letter-spacing:0.07em; text-decoration:none;
+  padding:0.9rem; border-radius:var(--r);
+  transition:all 0.2s;
+}
+.btn-gold-plan { background:var(--gold); color:var(--ink); }
+.btn-gold-plan:hover { background:var(--gold2); transform:translateY(-1px); }
+.btn-outline-plan { border:1px solid var(--line); color:var(--fog2); }
+.btn-outline-plan:hover { border-color:var(--gold); color:var(--gold); }
+
+/* ── TG CTA ── */
+.tg-wrap {
+  max-width:700px; margin:0 auto;
+  padding:5rem 2.5rem; text-align:center;
+  position:relative; z-index:1;
+}
+.tg-wrap h2 {
+  font-family:var(--serif); font-size:2.2rem; font-style:italic;
+  margin-bottom:0.75rem; color:var(--cream);
+}
+.tg-wrap p { font-size:0.9rem; color:var(--fog2); margin-bottom:2rem; }
+.btn-tg {
+  display:inline-flex; align-items:center; gap:10px;
+  background:#229ED9; color:#fff;
+  font-family:var(--mono); font-size:0.75rem; font-weight:500;
+  letter-spacing:0.06em; text-decoration:none;
+  padding:0.9rem 2rem; border-radius:var(--r);
+  transition:all 0.2s;
+}
+.btn-tg:hover { background:#1a8ec0; transform:translateY(-2px); }
+.tg-icon { width:16px; height:16px; fill:#fff; }
+
+/* ── FAQ ── */
+.faq-list { margin-top:3rem; border-top:1px solid var(--line); }
+.faq-item { border-bottom:1px solid var(--line); }
+.faq-q {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:1.25rem 0; cursor:pointer; font-size:0.9rem; font-weight:500;
+  color:var(--cream); transition:color 0.2s;
+}
+.faq-q:hover { color:var(--gold2); }
+.faq-icon {
+  font-family:var(--mono); font-size:1.1rem; color:var(--gold-dim);
+  transition:transform 0.25s, color 0.25s; line-height:1;
+}
+.faq-item.open .faq-icon { transform:rotate(45deg); color:var(--gold2); }
+.faq-a {
+  font-size:0.85rem; color:var(--fog); line-height:1.8; font-weight:400;
+  max-height:0; overflow:hidden;
+  transition:max-height 0.3s ease, padding 0.3s, opacity 0.3s;
+  opacity:0;
+}
+.faq-item.open .faq-a { max-height:200px; padding-bottom:1.25rem; opacity:1; }
+
+/* ── FOOTER ── */
+footer {
+  border-top:1px solid var(--line);
+  padding:2rem 2.5rem;
+  display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:1rem; position:relative; z-index:1;
+}
+.footer-brand {
+  font-family:var(--mono); font-size:0.68rem; color:var(--gold-dim);
+  letter-spacing:0.1em; text-transform:uppercase; font-weight:500;
+}
+.footer-disc {
+  font-size:0.72rem; color:var(--fog); max-width:520px;
+  line-height:1.6; font-weight:400;
+}
+
+/* ── DIVIDER ── */
+.gold-divider {
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0.25; position:relative; z-index:1;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){
+  .hero{flex-direction:column;gap:3rem;padding-top:8rem;}
+  .hero-right{flex:none;width:100%;max-width:400px;}
+  .numbers{grid-template-columns:repeat(2,1fr);}
+  .num-item{border-bottom:1px solid var(--line);}
+  .feat-grid{grid-template-columns:1fr;}
+  .feat-col{border-right:none;border-bottom:1px solid var(--line);}
+  .how-steps{grid-template-columns:1fr 1fr;}
+  .how-step{border-bottom:1px solid var(--line);}
+  .plans-wrap{grid-template-columns:1fr;}
+  .example-inner{grid-template-columns:1fr;gap:3rem;}
+  nav{padding:1rem 1.25rem;}
+  .nav-right .nav-link{display:none;}
+}
+@media(max-width:600px){
+  .numbers{grid-template-columns:1fr 1fr;}
+  .how-steps{grid-template-columns:1fr;}
+  footer{flex-direction:column;text-align:center;}
+}
+
+/* ── SCROLL ANIMATIONS ── */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.reveal.visible{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <span class="dot"></span>
+    PANDA V1000 PRO
+  </div>
+  <div class="nav-right">
+    <a href="#como-funciona" class="nav-link">Como funciona</a>
+    <a href="#planos" class="nav-link">Planos</a>
+    <a href="#planos" class="nav-cta">ACESSAR AGORA</a>
+  </div>
+</nav>
+
+<!-- TICKER -->
+<div class="ticker-outer">
+  <div class="ticker-track" id="ticker">
+    <span class="ticker-item"><span class="chk">✓</span>GREEN — Arsenal x Chelsea · Over 0.5 FT · +12min</span>
+    <span class="ticker-item"><span class="chk">✓</span>GREEN — Bayern x Dortmund · Over 1.5 FT · +19min</span>
+    <span class="ticker-item"><span class="chk">✓</span>GREEN — Inter x Milan · Over 2.5 FT · +25min</span>
+    <span class="ticker-item"><span class="chk">✓</span>GREEN — Palmeiras x Grêmio · Over 1.5 FT · +38min</span>
+    <span class="ticker-item"><span class="chk">✓</span>GREEN — PSG x Lyon · Over 0.5 FT · +7min</span>
+    <span class="ticker-item"><span class="chk">✓</span>GREEN — Alaves x Osasuna · Over 2.5 FT · +31min</span>
+    <span class="ticker-item"><span class="chk">✓</span>GREEN — Arsenal x Chelsea · Over 0.5 FT · +12min</span>
+    <span class="ticker-item"><span class="chk">✓</span>GREEN — Bayern x Dortmund · Over 1.5 FT · +19min</span>
+    <span class="ticker-item"><span class="chk">✓</span>GREEN — Inter x Milan · Over 2.5 FT · +25min</span>
+    <span class="ticker-item"><span class="chk">✓</span>GREEN — Palmeiras x Grêmio · Over 1.5 FT · +38min</span>
+    <span class="ticker-item"><span class="chk">✓</span>GREEN — PSG x Lyon · Over 0.5 FT · +7min</span>
+    <span class="ticker-item"><span class="chk">✓</span>GREEN — Alaves x Osasuna · Over 2.5 FT · +31min</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<div style="position:relative;">
+  <div class="hero-bg"></div>
+  <div class="hero">
+    <div class="hero-left reveal">
+      <p class="hero-kicker">Sistema quantitativo · Análise ao vivo</p>
+      <h1>Sinais com<br><em>vantagem matemática</em><br>verificada.</h1>
+      <p class="hero-desc">O PANDA monitora +35 ligas ao vivo, calcula pressão, momentum e EV real contra odds de bookmakers. Envia alerta só quando a matemática confirma. Sem palpite.</p>
+      <div class="hero-actions">
+        <a href="#planos" class="btn-gold">QUERO ACESSAR AGORA</a>
+        <a href="#como-funciona" class="btn-ghost-hero">Como funciona</a>
+      </div>
+    </div>
+    <div class="hero-right reveal" style="transition-delay:0.2s;">
+      <div class="signal-card">
+        <div class="sc-head">
+          <span class="sc-brand">PANDA V1000 PRO</span>
+          <span class="sc-live">
+            <span class="dot" style="width:6px;height:6px;"></span>AO VIVO
+          </span>
+        </div>
+        <p class="sc-match">Brazil Serie A</p>
+        <p class="sc-meta">Palmeiras vs Grêmio &nbsp;·&nbsp; 67' &nbsp;·&nbsp; 1-0</p>
+        <div class="sc-rows">
+          <div class="sc-row">
+            <span class="sc-label">Regime</span>
+            <span class="sc-val white">Explosão</span>
+          </div>
+          <div class="sc-row">
+            <span class="sc-label">Pressão atual</span>
+            <span class="sc-val gold">+8.4</span>
+          </div>
+          <div class="sc-row">
+            <span class="sc-label">ICT</span>
+            <span class="sc-val white">0.92</span>
+          </div>
+          <div class="sc-row">
+            <span class="sc-label">Prob. gol</span>
+            <span class="sc-val white">78.3%</span>
+          </div>
+          <div class="sc-row">
+            <span class="sc-label">Over 1.5 FT</span>
+            <span class="sc-val green">1.62 · real</span>
+          </div>
+          <div class="sc-row">
+            <span class="sc-label">Time provável</span>
+            <span class="sc-val white">Palmeiras</span>
+          </div>
+        </div>
+        <div class="sc-foot">
+          <span class="sc-score">71.4</span>
+          <span class="sc-badge">ELITE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="gold-divider"></div>
+
+<!-- NUMBERS -->
+<div class="numbers reveal">
+  <div class="num-item">
+    <div class="num-n">24h</div>
+    <div class="num-l">Monitoramento contínuo</div>
+  </div>
+  <div class="num-item">
+    <div class="num-n">+35</div>
+    <div class="num-l">Ligas cobertas</div>
+  </div>
+  <div class="num-item">
+    <div class="num-n">3</div>
+    <div class="num-l">Mercados simultâneos</div>
+  </div>
+  <div class="num-item">
+    <div class="num-n">EV+</div>
+    <div class="num-l">Vantagem verificada</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="funcionalidades">
+  <div class="reveal">
+    <p class="sec-label">Por que é diferente</p>
+    <h2 class="sec-h">Análise que nenhum<br><em>tipster faz na mão</em></h2>
+    <p class="sec-p">Cálculo sobre dados reais, a cada 40 segundos, em todos os jogos simultâneos. Não é instinto — é matemática.</p>
+  </div>
+
+  <div class="feat-grid reveal" style="transition-delay:0.15s;">
+    <div class="feat-col">
+      <div class="feat-item">
+        <p class="feat-num">01</p>
+        <h3>Motor físico ao vivo</h3>
+        <p>Pressão, momentum, ICT e regime de cada time em tempo real. Dados brutos da API, sem interpolação.</p>
+      </div>
+      <div class="feat-item">
+        <p class="feat-num">04</p>
+        <h3>Mercado por placar</h3>
+        <p>Over 0.5, 1.5 e 2.5 FT escolhidos automaticamente conforme o placar em tempo real.</p>
+      </div>
+    </div>
+    <div class="feat-col">
+      <div class="feat-item">
+        <p class="feat-num">02</p>
+        <h3>EV positivo obrigatório</h3>
+        <p>Nenhum sinal sem vantagem matemática verificada. Se a odd não justifica, o bot fica em silêncio.</p>
+      </div>
+      <div class="feat-item">
+        <p class="feat-num">05</p>
+        <h3>GREEN e RED transparente</h3>
+        <p>Quando o gol sai, o bot confirma automaticamente no grupo. Nenhum resultado é ocultado.</p>
+      </div>
+    </div>
+    <div class="feat-col">
+      <div class="feat-item">
+        <p class="feat-num">03</p>
+        <h3>Odds reais do bookmaker</h3>
+        <p>Busca a odd ao vivo antes de enviar. Você vê o número que existe no mercado, não uma estimativa.</p>
+      </div>
+      <div class="feat-item">
+        <p class="feat-num">06</p>
+        <h3>Time provável identificado</h3>
+        <p>O sistema indica qual time domina o momento atual — não o jogo como um todo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="gold-divider"></div>
+
+<!-- HOW IT WORKS -->
+<div class="how-wrap" id="como-funciona">
+  <div class="how-inner">
+    <div class="reveal">
+      <p class="sec-label">Processo</p>
+      <h2 class="sec-h">Do dado bruto ao<br><em>alerta no seu celular</em></h2>
+      <p class="sec-p">Quatro etapas automáticas, repetidas a cada 40 segundos, em todos os jogos ao vivo.</p>
+    </div>
+    <div class="how-steps reveal" style="transition-delay:0.15s;">
+      <div class="how-step">
+        <span class="step-num">01</span>
+        <div class="step-bar"></div>
+        <h3>Monitora ao vivo</h3>
+        <p>Varre todos os jogos em +35 ligas buscando dados atualizados a cada ciclo.</p>
+      </div>
+      <div class="how-step">
+        <span class="step-num">02</span>
+        <div class="step-bar"></div>
+        <h3>Calcula indicadores</h3>
+        <p>Pressão relativa, momentum, ICT, regime e probabilidade Poisson ajustada por liga.</p>
+      </div>
+      <div class="how-step">
+        <span class="step-num">03</span>
+        <div class="step-bar"></div>
+        <h3>Verifica EV</h3>
+        <p>Compara a probabilidade calculada com a odd real. EV negativo — silêncio total.</p>
+      </div>
+      <div class="how-step">
+        <span class="step-num">04</span>
+        <div class="step-bar"></div>
+        <h3>Envia o sinal</h3>
+        <p>Alerta completo no Telegram com dados completos. GREEN ou RED confirmado automaticamente.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="gold-divider"></div>
+
+<!-- SIGNAL EXAMPLE -->
+<div class="example-wrap">
+  <div class="example-inner">
+    <div class="reveal">
+      <p class="sec-label">Exemplo real</p>
+      <h2 class="sec-h">O que você<br><em>recebe no Telegram</em></h2>
+      <p class="sec-p" style="margin-bottom:1.75rem;">Cada sinal traz todos os dados que fundamentam a entrada. Sem narrativa — só números.</p>
+
+      <div style="background:rgba(30,138,94,0.08);border:1px solid rgba(30,138,94,0.25);border-radius:8px;padding:1.25rem 1.5rem;">
+        <div class="result-pill">
+          <span class="dot"></span> GREEN CONFIRMADO
+        </div>
+        <p style="font-size:0.88rem;color:var(--cream);font-weight:500;margin-bottom:4px;">Arsenal vs Chelsea · Over 0.5 FT · Odd 1.34</p>
+        <p style="font-size:0.78rem;color:var(--fog2);">Gol saiu no 71' &nbsp;·&nbsp; Sinal enviado no 59' &nbsp;·&nbsp; +12 minutos</p>
+      </div>
+    </div>
+
+    <div class="ex-card reveal" style="transition-delay:0.2s;">
+      <span style="display:block;color:rgba(201,168,76,0.4);font-size:0.72rem;margin-bottom:4px;">━━━━━━━━━━━━━━━━━━━━━</span>
+      <span style="display:block;"><span class="ew">🐼 PANDA V1000 PRO</span></span>
+      <span style="display:block;"><span class="edim">Premier League</span></span>
+      <span style="display:block;color:rgba(201,168,76,0.4);font-size:0.72rem;margin:2px 0;">━━━━━━━━━━━━━━━━━━━━━</span>
+      <span style="display:block;"><span class="ew">Arsenal</span> <span class="edim">vs</span> <span class="ew">Chelsea</span></span>
+      <span style="display:block;"><span class="edim">59' · Placar: 0-0</span></span>
+      <span style="display:block;color:rgba(201,168,76,0.4);font-size:0.72rem;margin:2px 0;">━━━━━━━━━━━━━━━━━━━━━</span>
+      <span style="display:block;">Regime <span class="ew">Explosão</span></span>
+      <span style="display:block;">Pressão <span class="eg">+7.1</span></span>
+      <span style="display:block;">ICT <span class="ew">████████░░ 0.84</span></span>
+      <span style="display:block;color:rgba(201,168,76,0.4);font-size:0.72rem;margin:2px 0;">━━━━━━━━━━━━━━━━━━━━━</span>
+      <span style="display:block;">Prob. gol <span class="ew">81.4%</span></span>
+      <span style="display:block;">Over 0.5 FT <span class="egr">1.34 · real</span></span>
+      <span style="display:block;">Força <span class="egr">⚡ Alta</span></span>
+      <span style="display:block;color:rgba(201,168,76,0.4);font-size:0.72rem;margin:2px 0;">━━━━━━━━━━━━━━━━━━━━━</span>
+      <span style="display:block;">Score <span class="eg">68.2/100  ████████░░</span></span>
+      <span style="display:block;"><span class="egr">HIGH</span> <span class="edim">· 22:14:07</span></span>
+    </div>
+  </div>
+</div>
+
+<div class="gold-divider"></div>
+
+<!-- PRICING -->
+<section class="section" id="planos">
+  <div class="reveal">
+    <p class="sec-label">Acesso</p>
+    <h2 class="sec-h">Escolha como<br><em>quer usar</em></h2>
+    <p class="sec-p">Dois formatos para o mesmo sistema. A diferença está em quem controla.</p>
+  </div>
+
+  <div class="plans-wrap reveal" style="transition-delay:0.15s;">
+    <!-- MENSAL -->
+    <div class="plan">
+      <p class="plan-name">VIP Telegram · Mensal</p>
+      <div class="plan-price">
+        <span class="plan-curr">$</span>
+        <span class="plan-val">29</span>
+        <span style="font-family:var(--mono);font-size:1rem;color:var(--fog2);align-self:flex-end;margin-bottom:6px;">,90</span>
+      </div>
+      <p class="plan-period">por mês · cancele quando quiser</p>
+      <div class="plan-div"></div>
+      <ul class="plan-list">
+        <li><span class="ok">✓</span> Sinais ao vivo no grupo VIP</li>
+        <li><span class="ok">✓</span> GREEN e RED automático</li>
+        <li><span class="ok">✓</span> +35 ligas cobertas</li>
+        <li><span class="ok">✓</span> Histórico de resultados</li>
+        <li><span class="ok">✓</span> Suporte via Telegram</li>
+        <li><span class="no">—</span> Código-fonte do bot</li>
+        <li><span class="no">—</span> Parâmetros customizáveis</li>
+      </ul>
+      <a href="https://t.me/PandaEliteBot" class="plan-btn btn-outline-plan" target="_blank">ENTRAR NO GRUPO VIP</a>
+    </div>
+
+    <!-- ANUAL -->
+    <div class="plan feat">
+      <span class="plan-tag">MELHOR VALOR</span>
+      <p class="plan-name">VIP Telegram · Anual</p>
+      <div class="plan-price">
+        <span class="plan-curr">$</span>
+        <span class="plan-val">197</span>
+      </div>
+      <p class="plan-period">pagamento único anual · <span style="color:var(--green2);">economia de $161</span></p>
+      <div class="plan-div"></div>
+      <ul class="plan-list">
+        <li><span class="ok">✓</span> Tudo do plano mensal</li>
+        <li><span class="ok">✓</span> Acesso por 12 meses completos</li>
+        <li><span class="ok">✓</span> Prioridade no suporte</li>
+        <li><span class="ok">✓</span> Acesso a atualizações do sistema</li>
+        <li><span class="ok">✓</span> Histórico completo e análises</li>
+        <li><span class="ok">✓</span> Grupo exclusivo de membros anuais</li>
+        <li><span class="ok">✓</span> 7 dias de garantia</li>
+      </ul>
+      <a href="https://t.me/PandaEliteBot" class="plan-btn btn-gold-plan" target="_blank">QUERO O PLANO ANUAL</a>
+    </div>
+  </div>
+
+  <p style="text-align:center;font-size:0.73rem;color:var(--fog);margin-top:1.5rem;">
+    PIX · cartão · cripto &nbsp;·&nbsp; Acesso imediato após confirmação &nbsp;·&nbsp; 7 dias de garantia no plano anual
+  </p>
+</section>
+
+<div class="gold-divider"></div>
+
+<!-- TG CTA -->
+<div class="tg-wrap reveal">
+  <h2>Veja antes de decidir.</h2>
+  <p>Entre no canal público e acompanhe sinais reais, com resultados, antes de assinar qualquer coisa.</p>
+  <a href="https://t.me/PandaEliteBot" class="btn-tg" target="_blank">
+    <svg class="tg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+    </svg>
+    Abrir no Telegram
+  </a>
+</div>
+
+<div class="gold-divider"></div>
+
+<!-- FAQ -->
+<section class="section" id="faq" style="padding-top:4rem;">
+  <div class="reveal">
+    <p class="sec-label">Dúvidas</p>
+    <h2 class="sec-h">Perguntas<br><em>frequentes</em></h2>
+  </div>
+
+  <div class="faq-list reveal" style="transition-delay:0.1s;">
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Preciso saber programar?<span class="faq-icon">+</span></div>
+      <div class="faq-a">Não. No plano VIP basta ter o Telegram. Você recebe os sinais prontos, com todos os dados e confirmação de resultado automática.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">O robô funciona o dia todo?<span class="faq-icon">+</span></div>
+      <div class="faq-a">Sim, enquanto houver jogos ao vivo nas ligas monitoradas. Os sinais aparecem sempre que a matemática confirma uma oportunidade — sem horário fixo.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Como funciona o EV?<span class="faq-icon">+</span></div>
+      <div class="faq-a">EV (Expected Value) mede se a odd paga mais do que a probabilidade real do evento. Todo sinal do PANDA tem EV positivo verificado — vantagem matemática esperada no longo prazo, não garantia por sinal individual.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Quais ligas são cobertas?<span class="faq-icon">+</span></div>
+      <div class="faq-a">+35 ligas: Premier League, La Liga, Serie A, Bundesliga, Ligue 1, Champions League, Europa League, Conference League, Brazil Série A e B, Libertadores, Sudamericana, MLS, Liga MX, Eredivisie, Primeira Liga e mais.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Tem garantia?<span class="faq-icon">+</span></div>
+      <div class="faq-a">7 dias de garantia no plano anual. Se não ficar satisfeito por qualquer motivo, devolvemos integralmente. Sem burocracia.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Qual a diferença entre mensal e anual?<span class="faq-icon">+</span></div>
+      <div class="faq-a">O acesso ao grupo VIP é idêntico. No plano anual você paga $197 uma única vez em vez de $29,90 por mês — economiza $161 ao longo do ano e tem 7 dias de garantia incluída.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="footer-brand">PANDA V1000 PRO · Sistema de análise quantitativa</span>
+  <p class="footer-disc">Apostas esportivas envolvem risco financeiro. Este sistema é uma ferramenta de análise estatística — não garante lucro por operação individual. Use com responsabilidade e dentro dos seus limites financeiros.</p>
+</footer>
+
+<script>
+function toggleFaq(el) {
+  const item = el.parentElement;
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+const ticker = document.getElementById('ticker');
+ticker.innerHTML += ticker.innerHTML;
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
