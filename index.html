@@ -3,531 +3,615 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PANDA V1000 PRO — Sinais ao vivo com vantagem matemática</title>
+<title>PANDA V1000 PRO — Sinais de futebol com vantagem matemática</title>
+<meta name="description" content="Sistema quantitativo que monitora +35 ligas ao vivo, calcula EV real e envia sinais só quando a matemática confirma. Over 0.5, 1.5 e 2.5 FT.">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --gold:     #C9A84C;
-  --gold2:    #E8C96A;
-  --gold3:    #F5DFA0;
-  --gold-dim: #7A6230;
-  --green:    #1E8A5E;
-  --green2:   #25A872;
-  --green-dim:#0F4D35;
-  --green-bg: #0A1F16;
-  --ink:      #0C0C0A;
-  --ink2:     #1A1A16;
-  --ink3:     #252520;
-  --fog:      #6B6B60;
-  --fog2:     #9A9A90;
-  --paper:    #F8F6F0;
-  --cream:    #FDFCF8;
-  --line:     rgba(201,168,76,0.18);
-  --line2:    rgba(201,168,76,0.08);
+  --gold:      #C9A84C;
+  --gold2:     #E8C96A;
+  --gold3:     #F5DFA0;
+  --gold-dim:  #7A6230;
+  --gold-glow: rgba(201,168,76,0.15);
+  --green:     #1E8A5E;
+  --green2:    #25A872;
+  --green3:    #4ade80;
+  --green-dim: #0F4D35;
+  --ink:       #0A0A08;
+  --ink2:      #131310;
+  --ink3:      #1C1C18;
+  --ink4:      #242420;
+  --fog:       #5A5A52;
+  --fog2:      #8A8A82;
+  --fog3:      #BCBCB4;
+  --cream:     #FDFCF8;
+  --line:      rgba(201,168,76,0.15);
+  --line2:     rgba(201,168,76,0.07);
+  --wapp:      #25D366;
+  --wapp2:     #128C7E;
   --mono: 'JetBrains Mono', monospace;
   --serif: 'Playfair Display', Georgia, serif;
   --sans: 'Syne', sans-serif;
-  --r: 6px;
+  --r: 6px; --r2: 10px; --r3: 14px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--sans);
+  background:var(--ink);
+  color:var(--cream);
+  font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
 }
 
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior:smooth; }
-
-body {
-  font-family: var(--sans);
-  background: var(--ink);
-  color: var(--cream);
-  font-size: 16px;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+/* GRAIN */
+body::before{
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity:0.5;
 }
 
-/* ── GRAIN ── */
-body::before {
-  content:'';
-  position:fixed; inset:0; z-index:0; pointer-events:none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity:0.35;
-}
-
-/* ── NAV ── */
-nav {
-  position:fixed; top:0; left:0; right:0; z-index:100;
+/* NAV */
+nav{
+  position:fixed; top:0; left:0; right:0; z-index:200;
   display:flex; align-items:center; justify-content:space-between;
-  padding:1.25rem 2.5rem;
-  background:rgba(12,12,10,0.82);
-  backdrop-filter:blur(20px);
+  padding:1.1rem 2.5rem;
+  background:rgba(10,10,8,0.88);
+  backdrop-filter:blur(24px);
   border-bottom:1px solid var(--line);
 }
-.nav-logo {
-  font-family:var(--mono); font-size:0.72rem; font-weight:500;
-  letter-spacing:0.14em; color:var(--gold);
+.nav-logo{
+  font-family:var(--mono); font-size:0.7rem; font-weight:500;
+  letter-spacing:0.16em; color:var(--gold);
   display:flex; align-items:center; gap:10px;
 }
-.nav-logo .dot {
+.pulse-dot{
   width:7px; height:7px; border-radius:50%; background:var(--green2);
-  animation: pulse 2.5s ease-in-out infinite;
+  animation:pulse 2.8s ease-in-out infinite; flex-shrink:0;
 }
-@keyframes pulse {
-  0%,100%{opacity:1;transform:scale(1);}
-  50%{opacity:0.4;transform:scale(0.7);}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.35;transform:scale(0.65);}}
+.nav-right{display:flex; align-items:center; gap:2rem;}
+.nav-link{
+  font-size:0.76rem; font-weight:500; color:var(--fog2);
+  text-decoration:none; letter-spacing:0.04em; transition:color 0.2s;
 }
-.nav-right { display:flex; align-items:center; gap:2.5rem; }
-.nav-link {
-  font-size:0.78rem; font-weight:500; color:var(--fog2);
-  text-decoration:none; letter-spacing:0.04em;
-  transition:color 0.2s;
-}
-.nav-link:hover { color:var(--gold2); }
-.nav-cta {
-  font-family:var(--mono); font-size:0.7rem; font-weight:500;
+.nav-link:hover{color:var(--gold2);}
+.nav-cta{
+  font-family:var(--mono); font-size:0.68rem; font-weight:500;
   color:var(--ink); background:var(--gold);
-  padding:0.5rem 1.25rem; border-radius:var(--r);
+  padding:0.48rem 1.2rem; border-radius:var(--r);
   text-decoration:none; letter-spacing:0.06em;
-  transition:background 0.2s, transform 0.2s;
+  transition:background 0.2s, transform 0.15s;
 }
-.nav-cta:hover { background:var(--gold2); transform:translateY(-1px); }
+.nav-cta:hover{background:var(--gold2); transform:translateY(-1px);}
 
-/* ── TICKER ── */
-.ticker-outer {
-  margin-top:72px;
-  background:var(--green-dim);
-  border-bottom:1px solid rgba(30,138,94,0.3);
-  overflow:hidden; padding:0.55rem 0;
+/* TICKER */
+.ticker-outer{
+  margin-top:68px;
+  background:linear-gradient(90deg, #0a1f14 0%, #0d2818 50%, #0a1f14 100%);
+  border-bottom:1px solid rgba(37,168,114,0.25);
+  overflow:hidden; padding:0.6rem 0;
 }
-.ticker-track {
-  display:flex; gap:3.5rem;
-  animation:scroll 35s linear infinite;
+.ticker-track{
+  display:flex; gap:3rem;
+  animation:scroll 40s linear infinite;
   white-space:nowrap;
 }
 @keyframes scroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
-.ticker-item {
-  font-family:var(--mono); font-size:0.68rem; color:#6DF5B0;
+.t-item{
+  font-family:var(--mono); font-size:0.67rem; color:var(--green3);
   display:flex; align-items:center; gap:7px; font-weight:500;
+  opacity:0.9;
 }
-.ticker-item .chk { color:#4ade80; font-size:0.6rem; }
+.t-chk{color:#4ade80; font-size:0.58rem; font-weight:700;}
 
-/* ── HERO ── */
-.hero {
-  position:relative; z-index:1;
-  min-height:100vh;
-  display:flex; align-items:center;
-  padding:7rem 2.5rem 5rem;
-  max-width:1200px; margin:0 auto;
-  gap:5rem;
-}
-.hero-bg {
-  position:absolute; inset:0; z-index:-1;
+/* HERO */
+.hero-wrap{position:relative; z-index:1; overflow:hidden;}
+.hero-glow{
+  position:absolute; inset:0; z-index:0; pointer-events:none;
   background:
-    radial-gradient(ellipse 60% 50% at 70% 50%, rgba(30,138,94,0.10) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 60% at 20% 40%, rgba(201,168,76,0.06) 0%, transparent 60%);
+    radial-gradient(ellipse 55% 60% at 75% 50%, rgba(30,138,94,0.09) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 50% at 15% 35%, rgba(201,168,76,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 30% 40% at 50% 80%, rgba(201,168,76,0.04) 0%, transparent 55%);
 }
-.hero-left { flex:1; max-width:560px; }
-.hero-kicker {
-  font-family:var(--mono); font-size:0.68rem; font-weight:500;
-  letter-spacing:0.16em; color:var(--green2); text-transform:uppercase;
-  margin-bottom:1.5rem; display:flex; align-items:center; gap:8px;
+.hero{
+  max-width:1160px; margin:0 auto;
+  display:flex; align-items:center;
+  padding:8rem 2.5rem 6rem;
+  gap:5rem; position:relative; z-index:1;
 }
-.hero-kicker::before {
-  content:''; display:block; width:20px; height:1px; background:var(--green2);
+.hero-left{flex:1; max-width:560px;}
+.hero-kicker{
+  font-family:var(--mono); font-size:0.66rem; font-weight:500;
+  letter-spacing:0.18em; color:var(--green2); text-transform:uppercase;
+  margin-bottom:1.75rem; display:flex; align-items:center; gap:10px;
 }
-.hero h1 {
+.hero-kicker::before{content:''; width:22px; height:1px; background:var(--green2); display:block;}
+.hero h1{
   font-family:var(--serif);
-  font-size:clamp(2.8rem, 5.5vw, 4.4rem);
-  line-height:1.08; letter-spacing:-0.01em;
+  font-size:clamp(2.6rem, 5vw, 4.2rem);
+  line-height:1.07; letter-spacing:-0.015em;
   margin-bottom:1.5rem; font-weight:700;
 }
-.hero h1 em {
-  font-style:italic; color:var(--gold2);
-  display:block;
+.hero h1 em{font-style:italic; color:var(--gold2); display:block;}
+.hero-desc{
+  font-size:0.97rem; color:var(--fog2); line-height:1.85;
+  margin-bottom:2.5rem; max-width:430px; font-weight:400;
 }
-.hero-desc {
-  font-size:1rem; font-weight:400; color:var(--fog2);
-  line-height:1.8; margin-bottom:2.5rem; max-width:440px;
-}
-.hero-actions { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; }
-.btn-gold {
-  font-family:var(--mono); font-size:0.78rem; font-weight:500;
+.hero-btns{display:flex; gap:0.9rem; align-items:center; flex-wrap:wrap;}
+.btn-primary{
+  font-family:var(--mono); font-size:0.76rem; font-weight:500;
   letter-spacing:0.07em; background:var(--gold); color:var(--ink);
   padding:0.9rem 2rem; border-radius:var(--r); text-decoration:none;
-  transition:all 0.2s; display:inline-block; position:relative;
-  overflow:hidden;
+  position:relative; overflow:hidden; display:inline-block;
+  transition:background 0.2s, transform 0.2s;
 }
-.btn-gold::after {
+.btn-primary::after{
   content:''; position:absolute; inset:0;
-  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.15) 50%,transparent 100%);
-  transform:translateX(-100%); transition:transform 0.5s;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);
+  transform:translateX(-100%); transition:transform 0.55s;
 }
-.btn-gold:hover { background:var(--gold2); transform:translateY(-2px); }
-.btn-gold:hover::after { transform:translateX(100%); }
-.btn-ghost-hero {
-  font-size:0.85rem; color:var(--fog2);
-  text-decoration:none;
-  border:1px solid rgba(201,168,76,0.25);
-  padding:0.9rem 1.75rem; border-radius:var(--r);
+.btn-primary:hover{background:var(--gold2); transform:translateY(-2px);}
+.btn-primary:hover::after{transform:translateX(100%);}
+.btn-ghost{
+  font-size:0.84rem; color:var(--fog2); text-decoration:none;
+  border:1px solid rgba(201,168,76,0.22);
+  padding:0.9rem 1.7rem; border-radius:var(--r);
   transition:all 0.2s;
 }
-.btn-ghost-hero:hover { border-color:var(--gold); color:var(--gold); }
+.btn-ghost:hover{border-color:var(--gold); color:var(--gold);}
 
-/* ── SIGNAL CARD HERO ── */
-.hero-right { flex:0 0 380px; position:relative; }
-.hero-right::before {
-  content:'';
-  position:absolute; inset:-30px;
-  background:radial-gradient(ellipse at center, rgba(201,168,76,0.08) 0%, transparent 70%);
-  z-index:-1;
+/* SIGNAL CARD */
+.hero-right{flex:0 0 370px; position:relative;}
+.hero-right::before{
+  content:''; position:absolute; inset:-40px; z-index:-1;
+  background:radial-gradient(ellipse at center, rgba(201,168,76,0.07) 0%, transparent 70%);
 }
-.signal-card {
+.signal-card{
   background:var(--ink3);
   border:1px solid var(--line);
-  border-radius:12px;
-  padding:1.75rem;
+  border-radius:var(--r3); padding:1.75rem;
   position:relative;
-  animation:float 6s ease-in-out infinite;
+  animation:float 7s ease-in-out infinite;
 }
 @keyframes float{
-  0%,100%{transform:translateY(0) rotate(0.4deg);}
-  50%{transform:translateY(-8px) rotate(-0.3deg);}
+  0%,100%{transform:translateY(0) rotate(0.35deg);}
+  50%{transform:translateY(-9px) rotate(-0.25deg);}
 }
-.signal-card::before {
-  content:''; position:absolute; top:0; left:1.75rem; right:1.75rem;
+.signal-card::before{
+  content:''; position:absolute; top:0; left:2rem; right:2rem;
   height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent);
 }
-.sc-head {
+.signal-card::after{
+  content:''; position:absolute; inset:0; border-radius:var(--r3);
+  box-shadow:0 0 40px rgba(201,168,76,0.06); pointer-events:none;
+}
+.sc-head{
   display:flex; justify-content:space-between; align-items:flex-start;
-  margin-bottom:1.25rem; padding-bottom:1rem;
-  border-bottom:1px solid var(--line);
+  margin-bottom:1.2rem; padding-bottom:1rem; border-bottom:1px solid var(--line);
 }
-.sc-brand { font-family:var(--mono); font-size:0.6rem; color:var(--gold); letter-spacing:0.12em; font-weight:500; }
-.sc-live {
+.sc-brand{font-family:var(--mono); font-size:0.58rem; color:var(--gold); letter-spacing:0.14em; font-weight:500;}
+.sc-live{
   display:flex; align-items:center; gap:5px;
-  font-family:var(--mono); font-size:0.6rem; color:var(--green2); font-weight:500;
+  font-family:var(--mono); font-size:0.58rem; color:var(--green2); font-weight:500;
 }
-.sc-match { font-size:0.95rem; font-weight:600; margin-bottom:3px; }
-.sc-meta { font-family:var(--mono); font-size:0.68rem; color:var(--fog2); margin-bottom:1.25rem; }
-.sc-rows { display:flex; flex-direction:column; }
-.sc-row {
+.sc-match{font-size:0.93rem; font-weight:600; margin-bottom:3px;}
+.sc-meta{font-family:var(--mono); font-size:0.65rem; color:var(--fog2); margin-bottom:1.1rem;}
+.sc-rows{display:flex; flex-direction:column;}
+.sc-row{
   display:flex; justify-content:space-between; align-items:center;
-  padding:0.55rem 0; border-bottom:1px solid var(--line2);
-  font-size:0.8rem;
+  padding:0.5rem 0; border-bottom:1px solid var(--line2); font-size:0.78rem;
 }
-.sc-row:last-child { border-bottom:none; }
-.sc-label { color:var(--fog); }
-.sc-val { font-family:var(--mono); font-size:0.76rem; font-weight:500; }
-.sc-val.gold { color:var(--gold2); }
-.sc-val.green { color:#4ade80; }
-.sc-val.white { color:var(--cream); }
-.sc-foot {
-  margin-top:1.25rem; padding-top:1rem;
-  border-top:1px solid var(--line);
+.sc-row:last-child{border-bottom:none;}
+.sc-label{color:var(--fog);}
+.sc-val{font-family:var(--mono); font-size:0.74rem; font-weight:500;}
+.sc-val.gold{color:var(--gold2);}
+.sc-val.grn{color:var(--green3);}
+.sc-val.wht{color:var(--cream);}
+.sc-foot{
+  margin-top:1.2rem; padding-top:1rem; border-top:1px solid var(--line);
   display:flex; justify-content:space-between; align-items:center;
 }
-.sc-score {
-  font-family:var(--serif); font-size:1.5rem; font-style:italic;
-  color:var(--gold2);
-}
-.sc-badge {
-  font-family:var(--mono); font-size:0.6rem; font-weight:500;
+.sc-score{font-family:var(--serif); font-size:1.55rem; font-style:italic; color:var(--gold2);}
+.sc-badge{
+  font-family:var(--mono); font-size:0.58rem; font-weight:500;
   letter-spacing:0.1em; color:var(--green2);
-  background:rgba(30,138,94,0.15);
-  border:1px solid rgba(30,138,94,0.3);
-  padding:0.3rem 0.8rem; border-radius:3px;
-  text-transform:uppercase;
+  background:rgba(37,168,114,0.12); border:1px solid rgba(37,168,114,0.28);
+  padding:0.28rem 0.8rem; border-radius:3px; text-transform:uppercase;
 }
 
-/* ── NUMBERS ── */
-.numbers {
-  border-top:1px solid var(--line);
-  border-bottom:1px solid var(--line);
+/* TRUST BAR */
+.trust-bar{
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
   display:grid; grid-template-columns:repeat(4,1fr);
   position:relative; z-index:1;
 }
-.num-item {
-  padding:3rem 2rem; text-align:center;
+.trust-item{
+  padding:2.75rem 1.75rem; text-align:center;
   border-right:1px solid var(--line);
-  position:relative; overflow:hidden;
   transition:background 0.3s;
 }
-.num-item:hover { background:rgba(201,168,76,0.04); }
-.num-item:last-child { border-right:none; }
-.num-n {
+.trust-item:hover{background:rgba(201,168,76,0.03);}
+.trust-item:last-child{border-right:none;}
+.trust-n{
   font-family:var(--serif); font-style:italic;
-  font-size:3.2rem; color:var(--gold2); line-height:1;
-  margin-bottom:0.4rem;
+  font-size:3rem; color:var(--gold2); line-height:1; margin-bottom:0.4rem;
 }
-.num-l { font-size:0.75rem; color:var(--fog); font-weight:400; letter-spacing:0.04em; }
+.trust-l{font-size:0.73rem; color:var(--fog); letter-spacing:0.04em;}
 
-/* ── SECTION ── */
-.section {
-  max-width:1100px; margin:0 auto;
-  padding:6rem 2.5rem;
-  position:relative; z-index:1;
+/* DIVIDER */
+.divider{
+  height:1px; position:relative; z-index:1;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0.2;
 }
-.sec-label {
-  font-family:var(--mono); font-size:0.65rem; font-weight:500;
-  letter-spacing:0.16em; color:var(--green2); text-transform:uppercase;
-  margin-bottom:1rem; display:flex; align-items:center; gap:8px;
-}
-.sec-label::before { content:''; display:block; width:16px; height:1px; background:var(--green2); }
-.sec-h {
-  font-family:var(--serif);
-  font-size:clamp(2rem,3.5vw,3rem);
-  line-height:1.12; letter-spacing:-0.01em;
-  margin-bottom:1rem; font-weight:700;
-}
-.sec-h em { font-style:italic; color:var(--gold2); }
-.sec-p { font-size:0.95rem; color:var(--fog2); line-height:1.8; max-width:480px; font-weight:400; }
 
-/* ── FEATURES GRID ── */
-.feat-grid {
-  margin-top:4rem;
-  display:grid; grid-template-columns:repeat(3,1fr);
+/* SECTION */
+.section{max-width:1100px; margin:0 auto; padding:6rem 2.5rem; position:relative; z-index:1;}
+.sec-label{
+  font-family:var(--mono); font-size:0.63rem; font-weight:500;
+  letter-spacing:0.18em; color:var(--green2); text-transform:uppercase;
+  margin-bottom:1rem; display:flex; align-items:center; gap:9px;
+}
+.sec-label::before{content:''; width:18px; height:1px; background:var(--green2); display:block;}
+.sec-h{
+  font-family:var(--serif); font-size:clamp(1.9rem,3.5vw,2.9rem);
+  line-height:1.1; letter-spacing:-0.01em; margin-bottom:1rem; font-weight:700;
+}
+.sec-h em{font-style:italic; color:var(--gold2);}
+.sec-p{font-size:0.94rem; color:var(--fog2); line-height:1.85; max-width:460px;}
+
+/* FEATURES */
+.feat-grid{
+  margin-top:4rem; display:grid; grid-template-columns:repeat(3,1fr);
   border-top:1px solid var(--line);
 }
-.feat-col { border-right:1px solid var(--line); }
-.feat-col:last-child { border-right:none; }
-.feat-item {
-  padding:2.5rem 2rem;
-  border-bottom:1px solid var(--line);
-  transition:background 0.3s;
+.feat-col{border-right:1px solid var(--line);}
+.feat-col:last-child{border-right:none;}
+.feat-item{
+  padding:2.25rem 1.85rem; border-bottom:1px solid var(--line);
+  transition:background 0.25s;
 }
-.feat-item:hover { background:rgba(201,168,76,0.03); }
-.feat-item:last-child { border-bottom:none; }
-.feat-num {
-  font-family:var(--mono); font-size:0.6rem; color:var(--gold-dim);
-  letter-spacing:0.1em; margin-bottom:1.2rem;
-  display:flex; align-items:center; gap:6px;
+.feat-item:hover{background:rgba(201,168,76,0.025);}
+.feat-item:last-child{border-bottom:none;}
+.feat-num{
+  font-family:var(--mono); font-size:0.58rem; color:var(--gold-dim);
+  letter-spacing:0.1em; margin-bottom:1.1rem;
+  display:flex; align-items:center; gap:7px;
 }
-.feat-num::after { content:''; flex:1; height:1px; background:var(--line); }
-.feat-item h3 {
-  font-family:var(--serif); font-size:1.1rem; font-style:italic;
-  margin-bottom:0.6rem; color:var(--cream);
-}
-.feat-item p { font-size:0.8rem; color:var(--fog); line-height:1.75; }
+.feat-num::after{content:''; flex:1; height:1px; background:var(--line);}
+.feat-item h3{font-family:var(--serif); font-size:1.05rem; font-style:italic; margin-bottom:0.55rem; color:var(--cream);}
+.feat-item p{font-size:0.79rem; color:var(--fog); line-height:1.78;}
 
-/* ── HOW STEPS ── */
-.how-wrap {
-  background:var(--ink2);
-  border-top:1px solid var(--line);
-  border-bottom:1px solid var(--line);
-}
-.how-inner { max-width:1100px; margin:0 auto; padding:6rem 2.5rem; }
-.how-steps {
+/* HOW */
+.how-wrap{background:var(--ink2); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+.how-inner{max-width:1100px; margin:0 auto; padding:6rem 2.5rem;}
+.how-steps{
   display:grid; grid-template-columns:repeat(4,1fr);
   margin-top:4rem; border-top:1px solid var(--line);
 }
-.how-step {
-  padding:2rem 1.75rem;
-  border-right:1px solid var(--line);
-}
-.how-step:last-child { border-right:none; }
-.step-num {
-  font-family:var(--mono); font-size:0.6rem; color:var(--gold-dim);
-  letter-spacing:0.12em; margin-bottom:1.5rem; display:block;
-}
-.step-bar { width:28px; height:2px; background:var(--gold); margin-bottom:1.25rem; border-radius:1px; }
-.how-step h3 { font-size:0.9rem; font-weight:600; margin-bottom:0.5rem; color:var(--cream); }
-.how-step p { font-size:0.78rem; color:var(--fog); line-height:1.7; }
+.how-step{padding:2rem 1.75rem; border-right:1px solid var(--line);}
+.how-step:last-child{border-right:none;}
+.step-n{font-family:var(--mono); font-size:0.58rem; color:var(--gold-dim); letter-spacing:0.12em; margin-bottom:1.5rem; display:block;}
+.step-bar{width:26px; height:2px; background:var(--gold); margin-bottom:1.2rem; border-radius:1px;}
+.how-step h3{font-size:0.88rem; font-weight:600; margin-bottom:0.5rem; color:var(--cream);}
+.how-step p{font-size:0.77rem; color:var(--fog); line-height:1.72;}
 
-/* ── EXAMPLE SECTION ── */
-.example-wrap {
-  background:var(--ink2);
-  border-top:1px solid var(--line);
-  border-bottom:1px solid var(--line);
-}
-.example-inner {
+/* EXAMPLE */
+.ex-wrap{background:var(--ink2); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+.ex-inner{
   max-width:1100px; margin:0 auto; padding:6rem 2.5rem;
-  display:grid; grid-template-columns:1fr 1fr;
-  gap:6rem; align-items:center;
+  display:grid; grid-template-columns:1fr 1fr; gap:5.5rem; align-items:center;
 }
-.ex-card {
-  background:var(--ink3);
-  border:1px solid var(--line);
-  border-radius:10px; padding:1.75rem;
-  font-family:var(--mono); font-size:0.78rem; line-height:2.1;
+.ex-card{
+  background:var(--ink4); border:1px solid var(--line); border-radius:var(--r2);
+  padding:1.75rem; font-family:var(--mono); font-size:0.77rem; line-height:2.1;
   position:relative; overflow:hidden;
 }
-.ex-card::before {
+.ex-card::before{
   content:''; position:absolute; top:0; left:0; right:0;
   height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent);
 }
-.eg { color:var(--gold2); }
-.edim { color:rgba(255,255,255,0.2); }
-.ew { color:rgba(255,255,255,0.85); }
-.egr { color:#4ade80; }
-.result-pill {
-  display:inline-flex; align-items:center; gap:8px;
-  background:rgba(30,138,94,0.12);
-  border:1px solid rgba(30,138,94,0.3);
-  border-radius:4px; padding:0.5rem 1rem;
-  font-family:var(--mono); font-size:0.68rem; color:var(--green2);
-  font-weight:500; letter-spacing:0.06em; text-transform:uppercase;
-  margin-bottom:1.25rem;
+.eg{color:var(--gold2);} .edim{color:rgba(255,255,255,0.18);}
+.ew{color:rgba(255,255,255,0.88);} .egr{color:var(--green3);}
+.green-box{
+  background:rgba(37,168,114,0.08); border:1px solid rgba(37,168,114,0.22);
+  border-radius:var(--r2); padding:1.25rem 1.5rem;
 }
-.result-pill .dot { width:6px; height:6px; border-radius:50%; background:var(--green2); }
+.green-pill{
+  display:inline-flex; align-items:center; gap:8px;
+  background:rgba(37,168,114,0.12); border:1px solid rgba(37,168,114,0.28);
+  border-radius:4px; padding:0.45rem 1rem;
+  font-family:var(--mono); font-size:0.65rem; color:var(--green2);
+  font-weight:500; letter-spacing:0.06em; text-transform:uppercase;
+  margin-bottom:1.1rem;
+}
 
-/* ── PRICING ── */
-.plans-wrap {
+/* ═══════════════════════════════════════════════
+   PRICING — seção principal
+═══════════════════════════════════════════════ */
+.plans-grid{
   display:grid; grid-template-columns:1fr 1fr;
   gap:1.5rem; margin-top:4rem;
 }
-.plan {
-  border:1px solid var(--line);
-  border-radius:10px; padding:2.5rem;
-  background:var(--ink2);
+.plan{
+  border:1px solid var(--line); border-radius:var(--r3);
+  padding:2.5rem; background:var(--ink2);
   position:relative; overflow:hidden;
   transition:transform 0.2s, border-color 0.2s;
+  display:flex; flex-direction:column;
 }
-.plan:hover { transform:translateY(-3px); }
-.plan.feat {
+.plan:hover{transform:translateY(-4px);}
+.plan.feat{
   border-color:var(--gold);
-  background:linear-gradient(135deg, var(--ink2) 0%, rgba(201,168,76,0.06) 100%);
+  background:linear-gradient(145deg, var(--ink2) 0%, rgba(201,168,76,0.055) 100%);
 }
-.plan.feat::before {
+.plan.feat::before{
   content:''; position:absolute; top:0; left:0; right:0;
   height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent);
 }
-.plan-tag {
+.plan-tag{
   position:absolute; top:1.5rem; right:1.5rem;
-  font-family:var(--mono); font-size:0.58rem; font-weight:500;
+  font-family:var(--mono); font-size:0.57rem; font-weight:500;
   letter-spacing:0.1em; text-transform:uppercase;
   background:var(--gold); color:var(--ink);
-  padding:3px 9px; border-radius:3px;
+  padding:3px 10px; border-radius:3px;
 }
-.plan-name {
-  font-family:var(--mono); font-size:0.65rem; font-weight:500;
-  letter-spacing:0.12em; color:var(--fog); text-transform:uppercase;
-  margin-bottom:1.25rem;
+.plan-name{
+  font-family:var(--mono); font-size:0.62rem; font-weight:500;
+  letter-spacing:0.14em; color:var(--fog); text-transform:uppercase;
+  margin-bottom:1.2rem;
 }
-.plan-price {
-  display:flex; align-items:baseline; gap:4px;
-  margin-bottom:0.35rem;
+.plan-price{display:flex; align-items:baseline; gap:3px; margin-bottom:0.3rem;}
+.plan-curr{
+  font-family:var(--sans); font-size:1rem; color:var(--fog2); font-weight:400;
+  align-self:flex-start; margin-top:9px;
 }
-.plan-curr { font-size:1.1rem; color:var(--fog2); font-weight:400; align-self:flex-start; margin-top:8px; }
-.plan-val {
-  font-family:var(--serif); font-size:3.5rem; font-style:italic;
+.plan-val{
+  font-family:var(--serif); font-size:3.6rem; font-style:italic;
   color:var(--gold2); line-height:1;
 }
-.plan-period { font-size:0.78rem; color:var(--fog); margin-bottom:2rem; font-weight:400; }
-.plan-div { height:1px; background:var(--line); margin:1.5rem 0; }
-.plan-list { list-style:none; display:flex; flex-direction:column; gap:0.7rem; margin-bottom:2rem; }
-.plan-list li {
-  font-size:0.82rem; color:var(--fog); font-weight:400;
-  display:flex; align-items:center; gap:10px;
+.plan-cents{
+  font-family:var(--mono); font-size:1rem; color:var(--fog2);
+  align-self:flex-end; margin-bottom:8px;
 }
-.ok { color:var(--green2); font-size:0.65rem; font-weight:600; }
-.no { color:var(--fog2); opacity:0.4; font-size:0.65rem; }
-.plan-btn {
+.plan-period{font-size:0.77rem; color:var(--fog); margin-bottom:1.75rem;}
+.plan-div{height:1px; background:var(--line); margin:1.5rem 0;}
+.plan-list{list-style:none; display:flex; flex-direction:column; gap:0.65rem; margin-bottom:1.75rem; flex:1;}
+.plan-list li{
+  font-size:0.81rem; color:var(--fog); display:flex; align-items:center; gap:10px;
+}
+.ok{color:var(--green2); font-size:0.62rem; font-weight:700;}
+.no{color:var(--fog); opacity:0.35; font-size:0.62rem;}
+
+/* BOTÕES DO PLANO */
+.plan-btns{display:flex; flex-direction:column; gap:0.75rem; margin-top:auto;}
+
+/* Botão principal: vai pro Asaas */
+.btn-pay{
   display:block; text-align:center;
-  font-family:var(--mono); font-size:0.75rem; font-weight:500;
+  font-family:var(--mono); font-size:0.74rem; font-weight:500;
   letter-spacing:0.07em; text-decoration:none;
-  padding:0.9rem; border-radius:var(--r);
+  padding:0.9rem 1rem; border-radius:var(--r);
+  transition:all 0.2s; position:relative; overflow:hidden;
+}
+.btn-pay-gold{background:var(--gold); color:var(--ink);}
+.btn-pay-gold::after{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);
+  transform:translateX(-100%); transition:transform 0.5s;
+}
+.btn-pay-gold:hover{background:var(--gold2); transform:translateY(-1px);}
+.btn-pay-gold:hover::after{transform:translateX(100%);}
+.btn-pay-outline{border:1px solid rgba(201,168,76,0.3); color:var(--fog2);}
+.btn-pay-outline:hover{border-color:var(--gold); color:var(--gold);}
+
+/* Botão secundário: WhatsApp */
+.btn-wapp{
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  font-family:var(--mono); font-size:0.68rem; font-weight:500;
+  letter-spacing:0.05em; text-decoration:none;
+  padding:0.75rem 1rem; border-radius:var(--r);
+  border:1px solid rgba(37,211,102,0.25);
+  color:rgba(37,211,102,0.7);
   transition:all 0.2s;
 }
-.btn-gold-plan { background:var(--gold); color:var(--ink); }
-.btn-gold-plan:hover { background:var(--gold2); transform:translateY(-1px); }
-.btn-outline-plan { border:1px solid var(--line); color:var(--fog2); }
-.btn-outline-plan:hover { border-color:var(--gold); color:var(--gold); }
+.btn-wapp:hover{
+  background:rgba(37,211,102,0.08);
+  border-color:rgba(37,211,102,0.5);
+  color:#25D366;
+}
+.btn-wapp svg{flex-shrink:0;}
 
-/* ── TG CTA ── */
-.tg-wrap {
-  max-width:700px; margin:0 auto;
+/* Separador OU */
+.plan-or{
+  display:flex; align-items:center; gap:0.75rem;
+  font-family:var(--mono); font-size:0.6rem; color:var(--fog);
+  letter-spacing:0.1em;
+}
+.plan-or::before,.plan-or::after{content:''; flex:1; height:1px; background:var(--line);}
+
+/* PIX badge */
+.pix-bar{
+  display:flex; align-items:center; justify-content:center;
+  gap:1.5rem; margin-top:2.5rem; flex-wrap:wrap;
+}
+.pix-pill{
+  display:flex; align-items:center; gap:8px;
+  background:rgba(201,168,76,0.07); border:1px solid var(--line);
+  border-radius:var(--r); padding:0.55rem 1.25rem;
+}
+.pix-pill span{font-family:var(--mono); font-size:0.67rem; color:var(--gold2); font-weight:500; letter-spacing:0.06em;}
+
+/* MODAL pós pagamento */
+.modal-bg{
+  display:none; position:fixed; inset:0; z-index:500;
+  background:rgba(0,0,0,0.78); backdrop-filter:blur(12px);
+  align-items:center; justify-content:center; padding:1.5rem;
+}
+.modal-bg.show{display:flex;}
+.modal-box{
+  background:var(--ink3); border:1px solid var(--line); border-radius:var(--r3);
+  padding:2.5rem; max-width:440px; width:100%; position:relative;
+  animation:modalIn 0.3s ease;
+}
+@keyframes modalIn{from{opacity:0;transform:scale(0.92) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.modal-box::before{
+  content:''; position:absolute; top:0; left:0; right:0;
+  height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  border-radius:var(--r3) var(--r3) 0 0;
+}
+.modal-close{
+  position:absolute; top:1.25rem; right:1.25rem;
+  font-family:var(--mono); font-size:1rem; color:var(--fog2);
+  cursor:pointer; background:none; border:none; transition:color 0.2s;
+}
+.modal-close:hover{color:var(--cream);}
+.modal-ico{
+  width:52px; height:52px; border-radius:50%;
+  background:rgba(37,211,102,0.12); border:1px solid rgba(37,211,102,0.3);
+  display:flex; align-items:center; justify-content:center;
+  margin:0 auto 1.5rem;
+}
+.modal-title{
+  font-family:var(--serif); font-size:1.4rem; font-style:italic;
+  text-align:center; margin-bottom:0.75rem; color:var(--cream);
+}
+.modal-sub{font-size:0.85rem; color:var(--fog2); text-align:center; line-height:1.7; margin-bottom:2rem;}
+.modal-steps{list-style:none; display:flex; flex-direction:column; gap:0.7rem; margin-bottom:2rem;}
+.modal-steps li{
+  display:flex; align-items:flex-start; gap:10px;
+  font-size:0.82rem; color:var(--fog2); line-height:1.5;
+}
+.modal-step-n{
+  font-family:var(--mono); font-size:0.62rem; color:var(--gold);
+  background:rgba(201,168,76,0.12); border:1px solid rgba(201,168,76,0.2);
+  width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; margin-top:1px;
+}
+.btn-modal-wapp{
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  background:var(--wapp); color:#fff;
+  font-family:var(--mono); font-size:0.76rem; font-weight:500;
+  letter-spacing:0.06em; text-decoration:none;
+  padding:1rem 1.5rem; border-radius:var(--r); width:100%;
+  transition:background 0.2s, transform 0.2s;
+}
+.btn-modal-wapp:hover{background:#1ebe5d; transform:translateY(-1px);}
+.modal-skip{
+  display:block; text-align:center; margin-top:0.9rem;
+  font-size:0.75rem; color:var(--fog); cursor:pointer;
+  background:none; border:none; font-family:var(--sans);
+  transition:color 0.2s;
+}
+.modal-skip:hover{color:var(--fog2);}
+
+/* CTA CENTRAL */
+.cta-wrap{
+  max-width:680px; margin:0 auto;
   padding:5rem 2.5rem; text-align:center;
   position:relative; z-index:1;
 }
-.tg-wrap h2 {
-  font-family:var(--serif); font-size:2.2rem; font-style:italic;
-  margin-bottom:0.75rem; color:var(--cream);
-}
-.tg-wrap p { font-size:0.9rem; color:var(--fog2); margin-bottom:2rem; }
-.btn-tg {
+.cta-wrap h2{font-family:var(--serif); font-size:2.1rem; font-style:italic; margin-bottom:0.75rem;}
+.cta-wrap p{font-size:0.88rem; color:var(--fog2); margin-bottom:2rem; line-height:1.75;}
+.btn-wapp-big{
   display:inline-flex; align-items:center; gap:10px;
-  background:#229ED9; color:#fff;
+  background:var(--wapp); color:#fff;
   font-family:var(--mono); font-size:0.75rem; font-weight:500;
   letter-spacing:0.06em; text-decoration:none;
-  padding:0.9rem 2rem; border-radius:var(--r);
+  padding:0.92rem 2rem; border-radius:var(--r);
   transition:all 0.2s;
 }
-.btn-tg:hover { background:#1a8ec0; transform:translateY(-2px); }
-.tg-icon { width:16px; height:16px; fill:#fff; }
+.btn-wapp-big:hover{background:#1ebe5d; transform:translateY(-2px);}
 
-/* ── FAQ ── */
-.faq-list { margin-top:3rem; border-top:1px solid var(--line); }
-.faq-item { border-bottom:1px solid var(--line); }
-.faq-q {
+/* FAQ */
+.faq-list{margin-top:3rem; border-top:1px solid var(--line);}
+.faq-item{border-bottom:1px solid var(--line);}
+.faq-q{
   display:flex; justify-content:space-between; align-items:center;
-  padding:1.25rem 0; cursor:pointer; font-size:0.9rem; font-weight:500;
+  padding:1.2rem 0; cursor:pointer; font-size:0.88rem; font-weight:500;
   color:var(--cream); transition:color 0.2s;
 }
-.faq-q:hover { color:var(--gold2); }
-.faq-icon {
-  font-family:var(--mono); font-size:1.1rem; color:var(--gold-dim);
-  transition:transform 0.25s, color 0.25s; line-height:1;
-}
-.faq-item.open .faq-icon { transform:rotate(45deg); color:var(--gold2); }
-.faq-a {
-  font-size:0.85rem; color:var(--fog); line-height:1.8; font-weight:400;
+.faq-q:hover{color:var(--gold2);}
+.faq-icon{font-family:var(--mono); font-size:1.1rem; color:var(--gold-dim); transition:transform 0.25s, color 0.25s;}
+.faq-item.open .faq-icon{transform:rotate(45deg); color:var(--gold2);}
+.faq-a{
+  font-size:0.84rem; color:var(--fog); line-height:1.8;
   max-height:0; overflow:hidden;
-  transition:max-height 0.3s ease, padding 0.3s, opacity 0.3s;
-  opacity:0;
+  transition:max-height 0.32s ease, padding 0.32s, opacity 0.32s; opacity:0;
 }
-.faq-item.open .faq-a { max-height:200px; padding-bottom:1.25rem; opacity:1; }
+.faq-item.open .faq-a{max-height:240px; padding-bottom:1.25rem; opacity:1;}
 
-/* ── FOOTER ── */
-footer {
+/* FOOTER */
+footer{
   border-top:1px solid var(--line);
   padding:2rem 2.5rem;
   display:flex; justify-content:space-between; align-items:center;
   flex-wrap:wrap; gap:1rem; position:relative; z-index:1;
 }
-.footer-brand {
-  font-family:var(--mono); font-size:0.68rem; color:var(--gold-dim);
-  letter-spacing:0.1em; text-transform:uppercase; font-weight:500;
-}
-.footer-disc {
-  font-size:0.72rem; color:var(--fog); max-width:520px;
-  line-height:1.6; font-weight:400;
-}
+.footer-brand{font-family:var(--mono); font-size:0.66rem; color:var(--gold-dim); letter-spacing:0.1em; text-transform:uppercase; font-weight:500;}
+.footer-disc{font-size:0.7rem; color:var(--fog); max-width:520px; line-height:1.65;}
 
-/* ── DIVIDER ── */
-.gold-divider {
-  height:1px;
-  background:linear-gradient(90deg,transparent,var(--gold),transparent);
-  opacity:0.25; position:relative; z-index:1;
-}
+/* SCROLL REVEAL */
+.reveal{opacity:0; transform:translateY(22px); transition:opacity 0.65s ease, transform 0.65s ease;}
+.reveal.visible{opacity:1; transform:none;}
 
-/* ── RESPONSIVE ── */
+/* RESPONSIVE */
 @media(max-width:960px){
-  .hero{flex-direction:column;gap:3rem;padding-top:8rem;}
-  .hero-right{flex:none;width:100%;max-width:400px;}
-  .numbers{grid-template-columns:repeat(2,1fr);}
-  .num-item{border-bottom:1px solid var(--line);}
+  .hero{flex-direction:column; gap:3rem; padding-top:8rem;}
+  .hero-right{flex:none; width:100%; max-width:390px;}
+  .trust-bar{grid-template-columns:repeat(2,1fr);}
+  .trust-item{border-bottom:1px solid var(--line);}
   .feat-grid{grid-template-columns:1fr;}
-  .feat-col{border-right:none;border-bottom:1px solid var(--line);}
+  .feat-col{border-right:none; border-bottom:1px solid var(--line);}
   .how-steps{grid-template-columns:1fr 1fr;}
   .how-step{border-bottom:1px solid var(--line);}
-  .plans-wrap{grid-template-columns:1fr;}
-  .example-inner{grid-template-columns:1fr;gap:3rem;}
+  .plans-grid{grid-template-columns:1fr;}
+  .ex-inner{grid-template-columns:1fr; gap:3rem;}
   nav{padding:1rem 1.25rem;}
   .nav-right .nav-link{display:none;}
 }
 @media(max-width:600px){
-  .numbers{grid-template-columns:1fr 1fr;}
+  .trust-bar{grid-template-columns:1fr 1fr;}
   .how-steps{grid-template-columns:1fr;}
-  footer{flex-direction:column;text-align:center;}
+  footer{flex-direction:column; text-align:center;}
+  .hero h1{font-size:2.4rem;}
 }
-
-/* ── SCROLL ANIMATIONS ── */
-.reveal{opacity:0;transform:translateY(20px);transition:opacity 0.6s ease,transform 0.6s ease;}
-.reveal.visible{opacity:1;transform:none;}
 </style>
 </head>
 <body>
 
+<!-- MODAL PÓS-PAGAMENTO -->
+<div class="modal-bg" id="modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="fecharModal()">✕</button>
+    <div class="modal-ico">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M20 6L9 17L4 12" stroke="#25D366" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h3 class="modal-title">Pagamento iniciado!</h3>
+    <p class="modal-sub" id="modal-sub">Após confirmar o pagamento via PIX, entre no WhatsApp para liberar seu acesso ao grupo VIP.</p>
+    <ul class="modal-steps">
+      <li><span class="modal-step-n">1</span>Conclua o pagamento via PIX na página do Asaas</li>
+      <li><span class="modal-step-n">2</span>Clique no botão abaixo e envie a mensagem já preenchida</li>
+      <li><span class="modal-step-n">3</span>Confirme o comprovante e receba o link do grupo VIP</li>
+    </ul>
+    <a href="#" id="modal-wapp-btn" class="btn-modal-wapp" target="_blank">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+      Entrar no WhatsApp para liberar acesso
+    </a>
+    <button class="modal-skip" onclick="fecharModal()">Já enviei, fechar</button>
+  </div>
+</div>
+
+<!-- NAV -->
 <nav>
   <div class="nav-logo">
-    <span class="dot"></span>
+    <span class="pulse-dot"></span>
     PANDA V1000 PRO
   </div>
   <div class="nav-right">
@@ -540,69 +624,53 @@ footer {
 <!-- TICKER -->
 <div class="ticker-outer">
   <div class="ticker-track" id="ticker">
-    <span class="ticker-item"><span class="chk">✓</span>GREEN — Arsenal x Chelsea · Over 0.5 FT · +12min</span>
-    <span class="ticker-item"><span class="chk">✓</span>GREEN — Bayern x Dortmund · Over 1.5 FT · +19min</span>
-    <span class="ticker-item"><span class="chk">✓</span>GREEN — Inter x Milan · Over 2.5 FT · +25min</span>
-    <span class="ticker-item"><span class="chk">✓</span>GREEN — Palmeiras x Grêmio · Over 1.5 FT · +38min</span>
-    <span class="ticker-item"><span class="chk">✓</span>GREEN — PSG x Lyon · Over 0.5 FT · +7min</span>
-    <span class="ticker-item"><span class="chk">✓</span>GREEN — Alaves x Osasuna · Over 2.5 FT · +31min</span>
-    <span class="ticker-item"><span class="chk">✓</span>GREEN — Arsenal x Chelsea · Over 0.5 FT · +12min</span>
-    <span class="ticker-item"><span class="chk">✓</span>GREEN — Bayern x Dortmund · Over 1.5 FT · +19min</span>
-    <span class="ticker-item"><span class="chk">✓</span>GREEN — Inter x Milan · Over 2.5 FT · +25min</span>
-    <span class="ticker-item"><span class="chk">✓</span>GREEN — Palmeiras x Grêmio · Over 1.5 FT · +38min</span>
-    <span class="ticker-item"><span class="chk">✓</span>GREEN — PSG x Lyon · Over 0.5 FT · +7min</span>
-    <span class="ticker-item"><span class="chk">✓</span>GREEN — Alaves x Osasuna · Over 2.5 FT · +31min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — Arsenal x Chelsea · Over 0.5 FT · +12min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — Bayern x Dortmund · Over 1.5 FT · +19min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — Inter x Milan · Over 2.5 FT · +25min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — Palmeiras x Grêmio · Over 1.5 FT · +38min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — PSG x Lyon · Over 0.5 FT · +7min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — Alaves x Osasuna · Over 2.5 FT · +31min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — Real Madrid x Atletico · Over 1.5 FT · +22min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — Flamengo x Corinthians · Over 0.5 FT · +14min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — Arsenal x Chelsea · Over 0.5 FT · +12min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — Bayern x Dortmund · Over 1.5 FT · +19min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — Inter x Milan · Over 2.5 FT · +25min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — Palmeiras x Grêmio · Over 1.5 FT · +38min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — PSG x Lyon · Over 0.5 FT · +7min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — Alaves x Osasuna · Over 2.5 FT · +31min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — Real Madrid x Atletico · Over 1.5 FT · +22min</span>
+    <span class="t-item"><span class="t-chk">✓</span>GREEN — Flamengo x Corinthians · Over 0.5 FT · +14min</span>
   </div>
 </div>
 
 <!-- HERO -->
-<div style="position:relative;">
-  <div class="hero-bg"></div>
+<div class="hero-wrap">
+  <div class="hero-glow"></div>
   <div class="hero">
     <div class="hero-left reveal">
       <p class="hero-kicker">Sistema quantitativo · Análise ao vivo</p>
       <h1>Sinais com<br><em>vantagem matemática</em><br>verificada.</h1>
-      <p class="hero-desc">O PANDA monitora +35 ligas ao vivo, calcula pressão, momentum e EV real contra odds de bookmakers. Envia alerta só quando a matemática confirma. Sem palpite.</p>
-      <div class="hero-actions">
-        <a href="#planos" class="btn-gold">QUERO ACESSAR AGORA</a>
-        <a href="#como-funciona" class="btn-ghost-hero">Como funciona</a>
+      <p class="hero-desc">O PANDA monitora +35 ligas ao vivo, calcula pressão, momentum e EV real contra odds de bookmakers. Envia alerta só quando a matemática confirma. Sem palpite, sem achismo.</p>
+      <div class="hero-btns">
+        <a href="#planos" class="btn-primary">QUERO ACESSAR AGORA</a>
+        <a href="#como-funciona" class="btn-ghost">Como funciona</a>
       </div>
     </div>
     <div class="hero-right reveal" style="transition-delay:0.2s;">
       <div class="signal-card">
         <div class="sc-head">
           <span class="sc-brand">PANDA V1000 PRO</span>
-          <span class="sc-live">
-            <span class="dot" style="width:6px;height:6px;"></span>AO VIVO
-          </span>
+          <span class="sc-live"><span class="pulse-dot" style="width:6px;height:6px;"></span>AO VIVO</span>
         </div>
         <p class="sc-match">Brazil Serie A</p>
         <p class="sc-meta">Palmeiras vs Grêmio &nbsp;·&nbsp; 67' &nbsp;·&nbsp; 1-0</p>
         <div class="sc-rows">
-          <div class="sc-row">
-            <span class="sc-label">Regime</span>
-            <span class="sc-val white">Explosão</span>
-          </div>
-          <div class="sc-row">
-            <span class="sc-label">Pressão atual</span>
-            <span class="sc-val gold">+8.4</span>
-          </div>
-          <div class="sc-row">
-            <span class="sc-label">ICT</span>
-            <span class="sc-val white">0.92</span>
-          </div>
-          <div class="sc-row">
-            <span class="sc-label">Prob. gol</span>
-            <span class="sc-val white">78.3%</span>
-          </div>
-          <div class="sc-row">
-            <span class="sc-label">Over 1.5 FT</span>
-            <span class="sc-val green">1.62 · real</span>
-          </div>
-          <div class="sc-row">
-            <span class="sc-label">Time provável</span>
-            <span class="sc-val white">Palmeiras</span>
-          </div>
+          <div class="sc-row"><span class="sc-label">Regime</span><span class="sc-val wht">Explosão</span></div>
+          <div class="sc-row"><span class="sc-label">Pressão atual</span><span class="sc-val gold">+8.4</span></div>
+          <div class="sc-row"><span class="sc-label">ICT</span><span class="sc-val wht">0.92</span></div>
+          <div class="sc-row"><span class="sc-label">Prob. gol</span><span class="sc-val wht">78.3%</span></div>
+          <div class="sc-row"><span class="sc-label">Over 1.5 FT</span><span class="sc-val grn">1.62 · real</span></div>
+          <div class="sc-row"><span class="sc-label">Time provável</span><span class="sc-val wht">Palmeiras</span></div>
         </div>
         <div class="sc-foot">
           <span class="sc-score">71.4</span>
@@ -613,26 +681,14 @@ footer {
   </div>
 </div>
 
-<div class="gold-divider"></div>
+<div class="divider"></div>
 
-<!-- NUMBERS -->
-<div class="numbers reveal">
-  <div class="num-item">
-    <div class="num-n">24h</div>
-    <div class="num-l">Monitoramento contínuo</div>
-  </div>
-  <div class="num-item">
-    <div class="num-n">+35</div>
-    <div class="num-l">Ligas cobertas</div>
-  </div>
-  <div class="num-item">
-    <div class="num-n">3</div>
-    <div class="num-l">Mercados simultâneos</div>
-  </div>
-  <div class="num-item">
-    <div class="num-n">EV+</div>
-    <div class="num-l">Vantagem verificada</div>
-  </div>
+<!-- TRUST BAR -->
+<div class="trust-bar reveal">
+  <div class="trust-item"><div class="trust-n">24h</div><div class="trust-l">Monitoramento contínuo</div></div>
+  <div class="trust-item"><div class="trust-n">+35</div><div class="trust-l">Ligas cobertas</div></div>
+  <div class="trust-item"><div class="trust-n">3</div><div class="trust-l">Mercados simultâneos</div></div>
+  <div class="trust-item"><div class="trust-n">EV+</div><div class="trust-l">Vantagem verificada</div></div>
 </div>
 
 <!-- FEATURES -->
@@ -642,7 +698,6 @@ footer {
     <h2 class="sec-h">Análise que nenhum<br><em>tipster faz na mão</em></h2>
     <p class="sec-p">Cálculo sobre dados reais, a cada 40 segundos, em todos os jogos simultâneos. Não é instinto — é matemática.</p>
   </div>
-
   <div class="feat-grid reveal" style="transition-delay:0.15s;">
     <div class="feat-col">
       <div class="feat-item">
@@ -677,13 +732,13 @@ footer {
       <div class="feat-item">
         <p class="feat-num">06</p>
         <h3>Time provável identificado</h3>
-        <p>O sistema indica qual time domina o momento atual — não o jogo como um todo.</p>
+        <p>O sistema indica qual time domina o momento atual — não o histórico acumulado do jogo.</p>
       </div>
     </div>
   </div>
 </section>
 
-<div class="gold-divider"></div>
+<div class="divider"></div>
 
 <!-- HOW IT WORKS -->
 <div class="how-wrap" id="como-funciona">
@@ -691,154 +746,194 @@ footer {
     <div class="reveal">
       <p class="sec-label">Processo</p>
       <h2 class="sec-h">Do dado bruto ao<br><em>alerta no seu celular</em></h2>
-      <p class="sec-p">Quatro etapas automáticas, repetidas a cada 40 segundos, em todos os jogos ao vivo.</p>
+      <p class="sec-p">Quatro etapas automáticas, repetidas a cada 40 segundos, em todos os jogos ao vivo simultaneamente.</p>
     </div>
     <div class="how-steps reveal" style="transition-delay:0.15s;">
       <div class="how-step">
-        <span class="step-num">01</span>
-        <div class="step-bar"></div>
+        <span class="step-n">01</span><div class="step-bar"></div>
         <h3>Monitora ao vivo</h3>
-        <p>Varre todos os jogos em +35 ligas buscando dados atualizados a cada ciclo.</p>
+        <p>Varre todos os jogos em +35 ligas buscando dados atualizados a cada ciclo de 40 segundos.</p>
       </div>
       <div class="how-step">
-        <span class="step-num">02</span>
-        <div class="step-bar"></div>
+        <span class="step-n">02</span><div class="step-bar"></div>
         <h3>Calcula indicadores</h3>
         <p>Pressão relativa, momentum, ICT, regime e probabilidade Poisson ajustada por liga.</p>
       </div>
       <div class="how-step">
-        <span class="step-num">03</span>
-        <div class="step-bar"></div>
+        <span class="step-n">03</span><div class="step-bar"></div>
         <h3>Verifica EV</h3>
-        <p>Compara a probabilidade calculada com a odd real. EV negativo — silêncio total.</p>
+        <p>Compara a probabilidade calculada com a odd real do bookmaker. EV negativo — silêncio total.</p>
       </div>
       <div class="how-step">
-        <span class="step-num">04</span>
-        <div class="step-bar"></div>
+        <span class="step-n">04</span><div class="step-bar"></div>
         <h3>Envia o sinal</h3>
-        <p>Alerta completo no Telegram com dados completos. GREEN ou RED confirmado automaticamente.</p>
+        <p>Alerta completo com todos os dados. GREEN ou RED confirmado automaticamente quando o gol sai.</p>
       </div>
     </div>
   </div>
 </div>
 
-<div class="gold-divider"></div>
+<div class="divider"></div>
 
-<!-- SIGNAL EXAMPLE -->
-<div class="example-wrap">
-  <div class="example-inner">
+<!-- EXAMPLE -->
+<div class="ex-wrap">
+  <div class="ex-inner">
     <div class="reveal">
       <p class="sec-label">Exemplo real</p>
-      <h2 class="sec-h">O que você<br><em>recebe no Telegram</em></h2>
-      <p class="sec-p" style="margin-bottom:1.75rem;">Cada sinal traz todos os dados que fundamentam a entrada. Sem narrativa — só números.</p>
-
-      <div style="background:rgba(30,138,94,0.08);border:1px solid rgba(30,138,94,0.25);border-radius:8px;padding:1.25rem 1.5rem;">
-        <div class="result-pill">
-          <span class="dot"></span> GREEN CONFIRMADO
-        </div>
-        <p style="font-size:0.88rem;color:var(--cream);font-weight:500;margin-bottom:4px;">Arsenal vs Chelsea · Over 0.5 FT · Odd 1.34</p>
-        <p style="font-size:0.78rem;color:var(--fog2);">Gol saiu no 71' &nbsp;·&nbsp; Sinal enviado no 59' &nbsp;·&nbsp; +12 minutos</p>
+      <h2 class="sec-h">O que você<br><em>recebe no grupo</em></h2>
+      <p class="sec-p" style="margin-bottom:1.75rem;">Cada sinal traz todos os dados que fundamentam a entrada. Sem narrativa — só números verificáveis.</p>
+      <div class="green-box">
+        <div class="green-pill"><span style="width:6px;height:6px;border-radius:50%;background:var(--green2);display:block;"></span>GREEN CONFIRMADO</div>
+        <p style="font-size:0.87rem;color:var(--cream);font-weight:500;margin-bottom:4px;">Arsenal vs Chelsea · Over 0.5 FT · Odd 1.34</p>
+        <p style="font-size:0.77rem;color:var(--fog2);">Gol saiu no 71' · Sinal enviado no 59' · +12 minutos</p>
       </div>
     </div>
-
     <div class="ex-card reveal" style="transition-delay:0.2s;">
-      <span style="display:block;color:rgba(201,168,76,0.4);font-size:0.72rem;margin-bottom:4px;">━━━━━━━━━━━━━━━━━━━━━</span>
+      <span style="display:block;color:rgba(201,168,76,0.35);font-size:0.7rem;margin-bottom:4px;">━━━━━━━━━━━━━━━━━━━━━</span>
       <span style="display:block;"><span class="ew">🐼 PANDA V1000 PRO</span></span>
       <span style="display:block;"><span class="edim">Premier League</span></span>
-      <span style="display:block;color:rgba(201,168,76,0.4);font-size:0.72rem;margin:2px 0;">━━━━━━━━━━━━━━━━━━━━━</span>
+      <span style="display:block;color:rgba(201,168,76,0.35);font-size:0.7rem;margin:2px 0;">━━━━━━━━━━━━━━━━━━━━━</span>
       <span style="display:block;"><span class="ew">Arsenal</span> <span class="edim">vs</span> <span class="ew">Chelsea</span></span>
       <span style="display:block;"><span class="edim">59' · Placar: 0-0</span></span>
-      <span style="display:block;color:rgba(201,168,76,0.4);font-size:0.72rem;margin:2px 0;">━━━━━━━━━━━━━━━━━━━━━</span>
+      <span style="display:block;color:rgba(201,168,76,0.35);font-size:0.7rem;margin:2px 0;">━━━━━━━━━━━━━━━━━━━━━</span>
       <span style="display:block;">Regime <span class="ew">Explosão</span></span>
       <span style="display:block;">Pressão <span class="eg">+7.1</span></span>
       <span style="display:block;">ICT <span class="ew">████████░░ 0.84</span></span>
-      <span style="display:block;color:rgba(201,168,76,0.4);font-size:0.72rem;margin:2px 0;">━━━━━━━━━━━━━━━━━━━━━</span>
+      <span style="display:block;color:rgba(201,168,76,0.35);font-size:0.7rem;margin:2px 0;">━━━━━━━━━━━━━━━━━━━━━</span>
       <span style="display:block;">Prob. gol <span class="ew">81.4%</span></span>
       <span style="display:block;">Over 0.5 FT <span class="egr">1.34 · real</span></span>
       <span style="display:block;">Força <span class="egr">⚡ Alta</span></span>
-      <span style="display:block;color:rgba(201,168,76,0.4);font-size:0.72rem;margin:2px 0;">━━━━━━━━━━━━━━━━━━━━━</span>
+      <span style="display:block;color:rgba(201,168,76,0.35);font-size:0.7rem;margin:2px 0;">━━━━━━━━━━━━━━━━━━━━━</span>
       <span style="display:block;">Score <span class="eg">68.2/100  ████████░░</span></span>
       <span style="display:block;"><span class="egr">HIGH</span> <span class="edim">· 22:14:07</span></span>
     </div>
   </div>
 </div>
 
-<div class="gold-divider"></div>
+<div class="divider"></div>
 
 <!-- PRICING -->
 <section class="section" id="planos">
   <div class="reveal">
     <p class="sec-label">Acesso</p>
-    <h2 class="sec-h">Escolha como<br><em>quer usar</em></h2>
-    <p class="sec-p">Dois formatos para o mesmo sistema. A diferença está em quem controla.</p>
+    <h2 class="sec-h">Escolha seu<br><em>plano e acesse agora</em></h2>
+    <p class="sec-p">Pagamento via PIX. Acesso ao grupo VIP liberado em até 30 minutos.</p>
   </div>
 
-  <div class="plans-wrap reveal" style="transition-delay:0.15s;">
-    <!-- MENSAL -->
+  <div class="plans-grid reveal" style="transition-delay:0.15s;">
+
+    <!-- ── PLANO MENSAL ── -->
     <div class="plan">
       <p class="plan-name">VIP · Mensal</p>
       <div class="plan-price">
-        <span class="plan-curr" style="font-family:var(--sans);font-size:1.1rem;color:var(--fog2);align-self:flex-start;margin-top:10px;">R$</span>
+        <span class="plan-curr">R$</span>
         <span class="plan-val">29</span>
-        <span style="font-family:var(--mono);font-size:1rem;color:var(--fog2);align-self:flex-end;margin-bottom:6px;">,90</span>
+        <span class="plan-cents">,90</span>
       </div>
       <p class="plan-period">por mês · cancele quando quiser</p>
       <div class="plan-div"></div>
       <ul class="plan-list">
-        <li><span class="ok">✓</span> Sinais ao vivo no grupo VIP</li>
-        <li><span class="ok">✓</span> GREEN e RED automático</li>
-        <li><span class="ok">✓</span> +35 ligas cobertas</li>
-        <li><span class="ok">✓</span> Histórico de resultados</li>
-        <li><span class="ok">✓</span> Suporte via WhatsApp</li>
-        <li><span class="no">—</span> Código-fonte do bot</li>
-        <li><span class="no">—</span> Parâmetros customizáveis</li>
+        <li><span class="ok">✓</span>Sinais ao vivo no grupo VIP</li>
+        <li><span class="ok">✓</span>GREEN e RED automático</li>
+        <li><span class="ok">✓</span>+35 ligas monitoradas</li>
+        <li><span class="ok">✓</span>Histórico de resultados</li>
+        <li><span class="ok">✓</span>Suporte via WhatsApp</li>
+        <li><span class="ok">✓</span>Pagamento via PIX</li>
+        <li><span class="no">—</span>Acesso anual com economia</li>
       </ul>
-      <a href="#" onclick="abrirWhatsApp('mensal');return false;" class="plan-btn btn-outline-plan">QUERO O PLANO MENSAL</a>
+      <div class="plan-btns">
+        <!-- Botão 1: Pagamento Asaas -->
+        <a href="https://www.asaas.com/c/kldcqt3avgghl13g"
+           class="btn-pay btn-pay-outline"
+           target="_blank"
+           onclick="agendarModal('mensal')">
+          💳 &nbsp;PAGAR VIA PIX — R$ 29,90
+        </a>
+        <!-- Separador -->
+        <div class="plan-or">ou fale antes de pagar</div>
+        <!-- Botão 2: WhatsApp direto -->
+        <a href="#" onclick="abrirWappDireto('mensal');return false;" class="btn-wapp">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          Tirar dúvidas no WhatsApp
+        </a>
+      </div>
     </div>
 
-    <!-- ANUAL -->
+    <!-- ── PLANO ANUAL ── -->
     <div class="plan feat">
       <span class="plan-tag">MELHOR VALOR</span>
       <p class="plan-name">VIP · Anual</p>
       <div class="plan-price">
-        <span class="plan-curr" style="font-family:var(--sans);font-size:1.1rem;color:var(--fog2);align-self:flex-start;margin-top:10px;">R$</span>
+        <span class="plan-curr">R$</span>
         <span class="plan-val">197</span>
       </div>
       <p class="plan-period">pagamento único · <span style="color:var(--green2);">economia de R$ 161,80</span></p>
       <div class="plan-div"></div>
       <ul class="plan-list">
-        <li><span class="ok">✓</span> Tudo do plano mensal</li>
-        <li><span class="ok">✓</span> Acesso por 12 meses completos</li>
-        <li><span class="ok">✓</span> Prioridade no suporte</li>
-        <li><span class="ok">✓</span> Acesso a atualizações do sistema</li>
-        <li><span class="ok">✓</span> Histórico completo e análises</li>
-        <li><span class="ok">✓</span> Grupo exclusivo de membros anuais</li>
-        <li><span class="ok">✓</span> 7 dias de garantia</li>
+        <li><span class="ok">✓</span>Tudo do plano mensal</li>
+        <li><span class="ok">✓</span>12 meses de acesso completo</li>
+        <li><span class="ok">✓</span>Prioridade no suporte</li>
+        <li><span class="ok">✓</span>Atualizações do sistema inclusas</li>
+        <li><span class="ok">✓</span>Histórico completo + análises</li>
+        <li><span class="ok">✓</span>Grupo exclusivo membros anuais</li>
+        <li><span class="ok">✓</span>7 dias de garantia total</li>
       </ul>
-      <a href="#" onclick="abrirWhatsApp('anual');return false;" class="plan-btn btn-gold-plan">QUERO O PLANO ANUAL</a>
+      <div class="plan-btns">
+        <!-- Botão 1: Pagamento Asaas -->
+        <a href="https://www.asaas.com/c/054vt3s4rnrd8j6c"
+           class="btn-pay btn-pay-gold"
+           target="_blank"
+           onclick="agendarModal('anual')">
+          💳 &nbsp;PAGAR VIA PIX — R$ 197,00
+        </a>
+        <!-- Separador -->
+        <div class="plan-or">ou fale antes de pagar</div>
+        <!-- Botão 2: WhatsApp direto -->
+        <a href="#" onclick="abrirWappDireto('anual');return false;" class="btn-wapp">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          Tirar dúvidas no WhatsApp
+        </a>
+      </div>
     </div>
-  </div>
 
-  <p style="text-align:center;font-size:0.73rem;color:var(--fog);margin-top:1.5rem;">
-    Pagamento exclusivo via PIX · Acesso liberado em até 30 minutos · 7 dias de garantia no plano anual
-  </p>
+  </div><!-- /plans-grid -->
+
+  <!-- PIX BAR -->
+  <div class="pix-bar reveal" style="transition-delay:0.2s;">
+    <div class="pix-pill">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path d="M6.5 6.5L17.5 17.5M17.5 6.5L6.5 17.5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/>
+        <rect x="9.5" y="2" width="5" height="5" rx="1" fill="#C9A84C" opacity="0.8"/>
+        <rect x="9.5" y="17" width="5" height="5" rx="1" fill="#C9A84C" opacity="0.8"/>
+        <rect x="2" y="9.5" width="5" height="5" rx="1" fill="#C9A84C" opacity="0.8"/>
+        <rect x="17" y="9.5" width="5" height="5" rx="1" fill="#C9A84C" opacity="0.8"/>
+      </svg>
+      <span>PAGAMENTO VIA PIX</span>
+    </div>
+    <span style="font-size:0.7rem;color:var(--fog);">Acesso em até 30 min após confirmação</span>
+    <span style="font-size:0.7rem;color:var(--fog);">7 dias de garantia no plano anual</span>
+  </div>
 </section>
 
-<div class="gold-divider"></div>
+<div class="divider"></div>
 
-<!-- TG CTA -->
-<div class="tg-wrap reveal">
-  <h2>Veja antes de decidir.</h2>
-  <p>Entre em contato pelo WhatsApp, tire suas dúvidas e confirme seu acesso ao grupo VIP com total segurança.</p>
-  <a href="https://wa.me/5518991320437?text=Ol%C3%A1%21+Quero+conhecer+o+PANDA+V1000+PRO.+Pode+me+passar+mais+informa%C3%A7%C3%B5es%3F" class="btn-tg" target="_blank">
-    <svg class="tg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<!-- CTA WHATSAPP -->
+<div class="cta-wrap reveal">
+  <h2>Ainda tem dúvidas?</h2>
+  <p>Entre em contato pelo WhatsApp antes de decidir. Tire todas as suas dúvidas e só então escolha o plano ideal.</p>
+  <a href="https://wa.me/5518991320437?text=Ol%C3%A1%21+Quero+conhecer+o+PANDA+V1000+PRO.+Pode+me+passar+mais+informa%C3%A7%C3%B5es%3F" class="btn-wapp-big" target="_blank">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
     </svg>
-    Falar no WhatsApp
+    Falar no WhatsApp agora
   </a>
 </div>
 
-<div class="gold-divider"></div>
+<div class="divider"></div>
 
 <!-- FAQ -->
 <section class="section" id="faq" style="padding-top:4rem;">
@@ -846,31 +941,30 @@ footer {
     <p class="sec-label">Dúvidas</p>
     <h2 class="sec-h">Perguntas<br><em>frequentes</em></h2>
   </div>
-
   <div class="faq-list reveal" style="transition-delay:0.1s;">
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">Preciso saber programar?<span class="faq-icon">+</span></div>
-      <div class="faq-a">Não. Basta ter acesso ao grupo VIP. Você recebe os sinais prontos, com todos os dados e confirmação de resultado automática — sem nenhum pré-requisito técnico.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">O robô funciona o dia todo?<span class="faq-icon">+</span></div>
-      <div class="faq-a">Sim, enquanto houver jogos ao vivo nas ligas monitoradas. Os sinais aparecem sempre que a matemática confirma uma oportunidade — sem horário fixo.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">Como funciona o EV?<span class="faq-icon">+</span></div>
-      <div class="faq-a">EV (Expected Value) mede se a odd paga mais do que a probabilidade real do evento. Todo sinal do PANDA tem EV positivo verificado — vantagem matemática esperada no longo prazo, não garantia por sinal individual.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">Quais ligas são cobertas?<span class="faq-icon">+</span></div>
-      <div class="faq-a">+35 ligas: Premier League, La Liga, Serie A, Bundesliga, Ligue 1, Champions League, Europa League, Conference League, Brazil Série A e B, Libertadores, Sudamericana, MLS, Liga MX, Eredivisie, Primeira Liga e mais.</div>
+      <div class="faq-a">Não. Basta ter acesso ao grupo VIP no Telegram. Você recebe os sinais prontos, com todos os dados e confirmação de resultado automática — sem nenhum pré-requisito técnico.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">Como é feito o pagamento?<span class="faq-icon">+</span></div>
-      <div class="faq-a">Exclusivamente via PIX. Após entrar em contato pelo WhatsApp e confirmar o plano desejado, você recebe a chave PIX, realiza o pagamento e o acesso é liberado em até 30 minutos.</div>
+      <div class="faq-a">Exclusivamente via PIX, pela plataforma Asaas. Clique no botão do plano desejado, pague o PIX, e em seguida entre no WhatsApp para confirmar e receber o link de acesso ao grupo VIP. O acesso é liberado em até 30 minutos.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">O robô funciona o dia todo?<span class="faq-icon">+</span></div>
+      <div class="faq-a">Sim, enquanto houver jogos ao vivo nas ligas monitoradas. Os sinais aparecem sempre que a matemática confirma uma oportunidade real — sem horário fixo.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Como funciona o EV?<span class="faq-icon">+</span></div>
+      <div class="faq-a">EV (Expected Value) mede se a odd paga mais do que a probabilidade real do evento. Todo sinal tem EV positivo verificado — vantagem matemática esperada no longo prazo, não garantia por sinal individual.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Quais ligas são cobertas?<span class="faq-icon">+</span></div>
+      <div class="faq-a">+35 ligas: Premier League, La Liga, Serie A, Bundesliga, Ligue 1, Champions League, Europa League, Conference League, Brazil Série A e B, Libertadores, Sudamericana, MLS, Liga MX, Eredivisie, Primeira Liga e mais da Europa, Américas e Ásia.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">Tem garantia?<span class="faq-icon">+</span></div>
-      <div class="faq-a">7 dias de garantia no plano anual. Se não ficar satisfeito por qualquer motivo, devolvemos integralmente. Sem burocracia, direto no PIX.</div>
+      <div class="faq-a">7 dias de garantia no plano anual. Se não ficar satisfeito, devolvemos integralmente via PIX. Sem burocracia.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">Qual a diferença entre mensal e anual?<span class="faq-icon">+</span></div>
@@ -885,37 +979,54 @@ footer {
 </footer>
 
 <script>
-var WA_NUM = '5518991320437';
+var WA    = '5518991320437';
+var MSG_M = 'Olá! Acabei de realizar o pagamento do *PANDA V1000 PRO — Plano Mensal (R$ 29,90)*.\n\nPoderia confirmar e me enviar o link de acesso ao grupo VIP? 🐼';
+var MSG_A = 'Olá! Acabei de realizar o pagamento do *PANDA V1000 PRO — Plano Anual (R$ 197,00)*.\n\nPoderia confirmar e me enviar o link de acesso ao grupo VIP? 🐼';
+var MSG_DM = 'Olá! Tenho interesse no *PANDA V1000 PRO — Plano Mensal (R$ 29,90/mês)*.\n\nPoderia me passar mais informações antes de assinar?';
+var MSG_DA = 'Olá! Tenho interesse no *PANDA V1000 PRO — Plano Anual (R$ 197,00)*.\n\nPoderia me passar mais informações antes de assinar?';
 
-var MSG_MENSAL = 'Olá! Tenho interesse no *PANDA V1000 PRO — Plano Mensal (R$ 29,90/mês)*.\n\nPoderia me passar os detalhes para realizar o pagamento via PIX e ter acesso ao grupo VIP?';
+var _planoModal = 'mensal';
 
-var MSG_ANUAL = 'Olá! Tenho interesse no *PANDA V1000 PRO — Plano Anual (R$ 197,00)*.\n\nPoderia me passar os detalhes para realizar o pagamento via PIX e garantir meu acesso pelo plano anual com desconto?';
+function agendarModal(plano) {
+  _planoModal = plano;
+  var sub = plano === 'anual'
+    ? 'Após pagar o PIX de R$ 197,00, entre no WhatsApp para liberar seu acesso ao grupo VIP anual.'
+    : 'Após pagar o PIX de R$ 29,90, entre no WhatsApp para liberar seu acesso ao grupo VIP mensal.';
+  document.getElementById('modal-sub').textContent = sub;
+  var msg  = plano === 'anual' ? MSG_A : MSG_M;
+  document.getElementById('modal-wapp-btn').href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msg);
+  setTimeout(function(){ document.getElementById('modal').classList.add('show'); }, 3000);
+}
 
-function abrirWhatsApp(plano) {
-  var msg = plano === 'anual' ? MSG_ANUAL : MSG_MENSAL;
-  var url = 'https://wa.me/' + WA_NUM + '?text=' + encodeURIComponent(msg);
-  window.open(url, '_blank');
+function fecharModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+
+document.getElementById('modal').addEventListener('click', function(e){
+  if(e.target === this) fecharModal();
+});
+
+function abrirWappDireto(plano) {
+  var msg = plano === 'anual' ? MSG_DA : MSG_DM;
+  window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
 function toggleFaq(el) {
   var item = el.parentElement;
-  var isOpen = item.classList.contains('open');
+  var open = item.classList.contains('open');
   document.querySelectorAll('.faq-item.open').forEach(function(i){ i.classList.remove('open'); });
-  if (!isOpen) item.classList.add('open');
+  if (!open) item.classList.add('open');
 }
 
-var ticker = document.getElementById('ticker');
-ticker.innerHTML += ticker.innerHTML;
+var tk = document.getElementById('ticker');
+tk.innerHTML += tk.innerHTML;
 
-var observer = new IntersectionObserver(function(entries) {
-  entries.forEach(function(e) {
-    if (e.isIntersecting) {
-      e.target.classList.add('visible');
-      observer.unobserve(e.target);
-    }
+var obs = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }
   });
-}, { threshold: 0.12 });
-document.querySelectorAll('.reveal').forEach(function(el){ observer.observe(el); });
+}, {threshold:0.1});
+document.querySelectorAll('.reveal').forEach(function(el){ obs.observe(el); });
 </script>
 </body>
 </html>
